@@ -10,8 +10,8 @@
 #
 # Workflow:
 #   1. fill in the CONFIG block from the protocol and preclinical prediction
-#   2. run with USE_FIXTURE = TRUE to prove the plumbing on public data
-#   3. set USE_FIXTURE = FALSE, point DATA_PATH at the real dataset, rerun
+#   2. run with DRY_RUN = TRUE to prove the plumbing on public data
+#   3. set DRY_RUN = FALSE, point DATA_PATH at the real dataset, rerun
 #   4. read the pre-flight verdict, then compare the two versions
 
 library(pmxSynthData)
@@ -21,7 +21,9 @@ library(pmxSynthData)
 # CONFIG  --  everything you edit is in this block
 # ============================================================================
 
-USE_FIXTURE <- TRUE          # TRUE: dry run on public data. FALSE: real data.
+DRY_RUN <- TRUE          # TRUE  = practice run on public stand-in data, no
+                         #         real data read, no privacy budget spent.
+                         # FALSE = use the real dataset at DATA_PATH.
 DATA_PATH   <- "data/your_modeling_dataset.csv"
 OUT_DIR     <- "output"
 EPSILON     <- 1             # from governance, not chosen to look good
@@ -69,7 +71,7 @@ PRIORS <- pmx_priors(
 # )
 
 # --- 4. Column roles: map YOUR columns onto PMX roles -----------------------
-# Only the roles the real dataset has. Ignored when USE_FIXTURE = TRUE.
+# Only the roles the real dataset has. Ignored when DRY_RUN = TRUE.
 ROLES <- pmx_roles(
   id   = "ID",  time = "TIME", dv  = "DV", amt = "AMT", evid = "EVID",
   dvid = "DVID", cmt = "CMT",  mdv = "MDV",
@@ -89,12 +91,14 @@ PREP <- function(d) {
 
 dir.create(OUT_DIR, showWarnings = FALSE, recursive = TRUE)
 
-# ---- Read the real (or fixture) source data --------------------------------
+# ---- Read the source data (real, or dry-run stand-in) ----------------------
 read_source <- function() {
-  if (USE_FIXTURE) {
+  if (DRY_RUN) {
+    # A public stand-in dataset with a known true clearance, so we can confirm
+    # the pipeline recovers it before ever touching real data.
     truth <- pmx_structural_model(
       "1cmt_oral", c(cl = 22, v = 70, ka = 1),   # 2.2x the prediction
-      source = "fixture truth"
+      source = "dry-run stand-in truth"
     )
     return(pmx_generate(truth, DESIGN, n_subjects = 40, seed = 1))
   }
@@ -105,7 +109,7 @@ read_source <- function() {
 }
 
 raw   <- PREP(read_source())
-roles <- if (USE_FIXTURE) pmx_generated_roles() else ROLES
+roles <- if (DRY_RUN) pmx_generated_roles() else ROLES
 
 message("\n== Source structural validation (restricted) ==")
 report <- validate_pmx(raw, roles, strict = FALSE)
@@ -134,8 +138,8 @@ message("\n== CALIBRATED version ==")
 fit <- fit_calibrated_pmx(
   raw, roles, MODEL, DESIGN, PRIORS,
   epsilon       = EPSILON,
-  backend       = if (USE_FIXTURE) "public" else "opendp",
-  public_source = USE_FIXTURE          # NEVER TRUE for confidential data
+  backend       = if (DRY_RUN) "public" else "opendp",
+  public_source = DRY_RUN          # NEVER TRUE for confidential data
 )
 print(fit)
 message("\nProvenance (for the release record):")
