@@ -129,7 +129,7 @@ concluding anything about how much epsilon this design needs.
 
 | ID | Area | Issue | Suggested direction | Status |
 |---|---|---|---|---|
-| `REV-001` | Decoding | Raw noisy counts compared against the literal `0.25` as if they were probabilities. Occurs at `R/representation.R:592, 605, 624, 640, 656, 658, 685`. Note the inconsistency *within* `.decode_timing()`: line 581 correctly divides by `count` first, line 592 does not. Unoccupied cells decode to a domain endpoint instead of "no support", at every N. | Gate on a scale-aware threshold, e.g. `max(f * private_count, k * b)`. The noise scale `b = sensitivity / epsilon` is already recorded in the accounting table, so a principled threshold is available for free — pass it into the decoders. Add a regression test asserting that a grid cell with zero true support never decodes to a working-domain endpoint. | open |
+| `REV-001` | Decoding | Raw noisy counts compared against the literal `0.25` as if they were probabilities. Occurred at `R/representation.R:592, 605, 624, 640, 656, 658, 685`. Unoccupied cells decoded to a domain endpoint instead of "no support", at every N. | **Fixed.** Added `.support_threshold(count, noise_scale)` and a backend-supplied `noise_scale()`; decoders now gate on `max(0.25, min(3 * b, count / 2))`. Tracked as `SIM-020` with regression tests in `tests/testthat/test-decode-support-threshold.R`. Measured effect at epsilon 5: empty cells pinned to the working-domain floor drop from 83% to 0% at N >= 600, and curve error at N = 2000 halves (0.099 -> 0.045). No effect at N <= 100, and none on the noiseless public-fixture path by construction. | closed |
 | `REV-002` | API / guidance | Nothing warns a user that their N is too small for their epsilon and release dimension until after the budget is irreversibly spent. The existing check (`R/fit.R:252`) fires on `dimensions > 6 * count`, which is dimension-vs-N only and ignores epsilon entirely. | Add a public pre-flight helper that takes the configuration (no data) and reports the predicted `sensitivity / (epsilon_group * N)` error per release group against a stated usability threshold. Document the `N >~ sensitivity / (epsilon_group * target_error)` envelope in the epsilon vignette. This converts "unusable" into "usable within a stated envelope", which is the honest and far more useful claim. | open |
 
 ### P1 — Privacy correctness
@@ -178,6 +178,104 @@ concluding anything about how much epsilon this design needs.
 6. `REV-004` + `REV-006` — Gaussian/zCDP, if step 4 shows it is still needed.
 7. `REV-007` — representation redesign, only if steps 5-6 are insufficient.
 8. P3 items opportunistically.
+
+---
+
+## Part 3 — Is this feasible at N = 8, 20, 40, 100?
+
+Measured after the `REV-001` fix, on `pmx_simulated_fixture(N)`, dose-relative
+log `cp` endpoint, 8 repetitions per cell. `curve_err` is the median absolute
+error of the decoded population curve on the working scale, **divided by the
+true curve's own dynamic range**. So `curve_err >= 1` means the error is larger
+than the entire signal being estimated — the output carries no information
+about the source.
+
+| N | epsilon 1 | epsilon 5 | epsilon 50 |
+|---:|---:|---:|---:|
+| 8 | 1.76 | 4.34 | 1.03 |
+| 20 | 3.27 | 2.68 | 0.58 |
+| 40 | 4.35 | 2.17 | 0.36 |
+| 100 | 2.55 | 1.46 | 0.16 |
+| 600 | 0.85 | 0.21 | 0.03 |
+| 2000 | 0.32 | 0.09 | 0.01 |
+
+At defensible epsilon (1-5), every cohort at or below N = 100 produces
+`curve_err > 1`. The generated data at those sizes is a draw from the
+package's post-processing priors with a privacy-noise decoration on top. It is
+not source-calibrated in any meaningful sense, and no amount of decoder
+engineering changes that.
+
+### This is a lower bound, not an implementation defect
+
+Known lower bounds for releasing `d` attribute means over `N` records under
+`(epsilon, delta)`-DP put the per-coordinate error at roughly
+
+```
+error  >=  sqrt(d) / (epsilon * N)     (times a modest sqrt(log(1/delta)) factor)
+```
+
+Order-of-magnitude, with `d = 40` and a delta factor of ~5:
+
+| N | floor at epsilon 5, d = 40 | floor at epsilon 5, d = 6 |
+|---:|---:|---:|
+| 8 | 0.79 | 0.31 |
+| 20 | 0.32 | 0.12 |
+| 40 | 0.16 | 0.06 |
+| 100 | 0.06 | 0.02 |
+| 600 | 0.01 | 0.004 |
+
+Two things follow. First, **N < 20 is not achievable under any formal guarantee
+at a defensible epsilon**, by any implementation — stop trying. Second, the gap
+between today's measured 1.46 at N = 100 and the ~0.06 floor is roughly 25x,
+which is approximately what `REV-005` + `REV-006` + `REV-007` claim to recover
+together. The small-to-mid range is an engineering problem; the very small
+range is not.
+
+### Recommended tiering
+
+| Cohort | Verdict | Recommended mode |
+|---|---|---|
+| N >= ~500 | Works today at epsilon 5, after `REV-001` | Current DP path unchanged |
+| N ~100-500 | Not viable today; plausibly viable after P2 | Do `REV-005`, `REV-006`, `REV-007`, then re-measure |
+| N ~20-100 | At the edge of theory even with a perfect implementation | Only reachable by cutting `d` to single digits (`REV-007`). Treat as research, not roadmap |
+| N < 20 | Not achievable, provably | Do not fit. See below |
+
+### What to do instead at small N
+
+The package already contains almost everything needed for the honest answer,
+but it is currently reachable only as a testing backdoor.
+
+1. **Make "public design only" a first-class generation mode.** Users with 8 or
+   40 patients overwhelmingly want structurally realistic PMX tables to
+   exercise cleaning, joins, control-file plumbing, and censoring logic. None
+   of that requires touching patient data. `pmx_public_design()`,
+   `pmx_bounds()`, `pmx_endpoint()`, and `.resolved_regimen()`'s fallbacks
+   already support generating entirely from declared public inputs. Expose a
+   `generate_pmx()` path that consumes **no** source data and **no** privacy
+   budget, and therefore needs no DP claim. Today the only way to get this is
+   `backend = "public"`, which is gated behind `public_source = TRUE` and is
+   framed as a fixture hack rather than a supported answer.
+2. **Separate the fitting cohort from the generated cohort in the
+   documentation.** The privacy unit is one subject in the *fit*; `n_subjects`
+   in `generate_pmx()` is unrelated. A user can fit on 2,000 pooled subjects
+   and generate 20. This already works and is the single most useful thing to
+   tell a small-study user, but neither the README nor the demo vignette says
+   it. Pooling across studies is the real answer to small N.
+3. **Make release dimension adapt to (N, epsilon).** Rather than always
+   releasing a 40-number curve, choose a tier from the planning calculation in
+   `REV-002`: a large cohort gets the dense grid; a small cohort gets a handful
+   of scalars (subject count, mean dose, mean observation count) with
+   everything else supplied by the public design. A few scalars at N = 40 have
+   error `~1 / (epsilon * 40)`, which is perfectly acceptable — it is only the
+   40-dimensional curve that is hopeless.
+4. **Refuse, or warn hard, rather than silently producing noise.** The existing
+   `population$private_subject_count < 6` warning (`R/fit.R:246`) fires far too
+   late and far too rarely. `REV-002`'s pre-flight check should make the
+   infeasible case loud *before* budget is spent.
+
+The net position worth documenting: this package is a **pooled-data tool**. It
+turns a large confidential corpus into a reusable generator. It is not, and
+cannot be, a way to make a 20-patient study shareable.
 
 ## Caveats on this review
 
