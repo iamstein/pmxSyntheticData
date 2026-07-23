@@ -6,7 +6,7 @@ inside the safe computing environment.
 ## This folder does not go to git
 
 The root `.gitignore` ignores everything here **except** `README.md` and
-`try_calibrated.R`. Real datasets, generated tables, fitted models, and every
+`try_dp_calibrated.R`. Real datasets, generated tables, fitted models, and every
 figure stay local. Before adding any new tracked file, confirm it contains no
 patient data and allow-list it explicitly.
 
@@ -30,8 +30,8 @@ privacy budget.
 
 The config can be drafted from public documents alone, so an AI that sees only
 the protocol and the column headers (not the data) can produce it. That is the
-intended path; see `design/MODEL_ELICITATION.md` and
-`design/DATA_ELICITATION.md`, which are written to be worked by a person or an
+intended path; see `vignettes/articles/model-elicitation.Rmd` and
+`vignettes/articles/data-elicitation.Rmd`, which are written to be worked by a person or an
 agent.
 
 ## The regimen skeleton
@@ -48,14 +48,14 @@ Whether that table is a public input depends on one question:
   a public template. Using the real one reproduces the realized cohort sizes and
   dose distribution exactly; that is a realized-design disclosure, treated as
   public by assertion and recorded (see `REV-017` and
-  `design/DATA_ELICITATION.md` section 3).
+  `vignettes/articles/data-elicitation.Rmd` section 3).
 - **Outcome-adaptive** — the dose a subject received depends on their own
   tolerability or response (adaptive escalation, response titration). Then the
   per-subject dose *sequence* encodes that subject's outcome and must **not** be
   copied row-for-row. Generate the regimen from the public rule instead, or work
   from the planned design.
 
-This step is being shaped; see the note at the top of `try_calibrated.R` and the
+This step is being shaped; see the note at the top of `try_dp_calibrated.R` and the
 project TODO. For a first pass the template uses the parametric design, which is
 correct for fixed cohorts.
 
@@ -77,7 +77,7 @@ Both scripts follow the same pattern:
 1. Fill in the `CONFIG` block. For `try_avatar.R` that is just the column roles.
    For `try_dp_calibrated.R` it is the structural model, priors, and trial
    design, and nothing in it should come from looking at the data — see the
-   cardinal rule in `design/MODEL_ELICITATION.md`.
+   cardinal rule in `vignettes/articles/model-elicitation.Rmd`.
 2. Run with `DRY_RUN <- TRUE` first. This exercises the whole pipeline on public
    simulated data and never touches your dataset.
 3. For the DP script, read the pre-flight verdict; if `f >= 1` the release will

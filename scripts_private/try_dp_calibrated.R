@@ -20,7 +20,7 @@
 #   4. read the pre-flight verdict, then compare the two versions
 
 library(synpmx)
-# If not installed here: devtools::load_all("/path/to/pmxSyntheticData")
+# If not installed here: devtools::load_all("/path/to/synpmx")
 
 # ============================================================================
 # CONFIG  --  everything you edit is in this block

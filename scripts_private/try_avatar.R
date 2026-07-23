@@ -18,7 +18,7 @@
 #   4. compare the synthetic table to the source
 
 library(synpmx)
-# If not installed here: devtools::load_all("/path/to/pmxSyntheticData")
+# If not installed here: devtools::load_all("/path/to/synpmx")
 
 # ============================================================================
 # CONFIG  --  everything you edit is in this block
