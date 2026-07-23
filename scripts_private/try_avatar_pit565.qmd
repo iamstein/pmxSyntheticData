@@ -1,6 +1,6 @@
 ---
 title: "AVATAR synthesis on CPIT565A1 modeling data"
-format: html
+format: pdf
 ---
 
 Try the AVATAR blending generator on a real modeling dataset.
@@ -29,7 +29,10 @@ library(xgxr)
 xgx_theme_set()
 
 # If not installed here: devtools::load_all("/path/to/synpmx")
-#devtools::load_all()
+# This load_all line only needs to be run once, so you may comment out if you're 
+# Trying this out on your own dataset
+
+devtools::load_all()
 library(synpmx)
 
 ```
