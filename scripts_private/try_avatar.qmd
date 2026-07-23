@@ -21,6 +21,7 @@ roles -- and run. You should not need to touch anything below them.
 #| label: setup
 #| message: false
 library(synpmx)
+library(ggplot2)
 # If synpmx is not installed here: devtools::load_all("/path/to/synpmx")
 ```
 
@@ -83,7 +84,10 @@ if (!file.exists(DATA_PATH)) {
        normalizePath(DATA_PATH, mustWork = FALSE),
        "\nEdit DATA_PATH in the configuration chunk.", call. = FALSE)
 }
-raw   <- PREP(read.csv(DATA_PATH, stringsAsFactors = FALSE))
+raw   <- read.csv(DATA_PATH, stringsAsFactors = FALSE)
+# Optional cleanup here: filter to one study, fix units, recode a column.
+# Pooling two assays with different limits trips the censoring check, so filter
+# to a single study if that applies, e.g. raw <- raw[raw$STUDYID == "X", ].
 roles <- ROLES
 
 report <- validate_pmx(raw, roles, strict = FALSE)
@@ -119,45 +123,41 @@ Source-derived. Keep it in the safe environment; do not export the figure.
 #| label: diagnostic
 #| fig-width: 9
 #| fig-height: 6
-if (requireNamespace("ggplot2", quietly = TRUE)) {
-  # The plot adapts to however many endpoints there are -- one PK, one PD, two,
-  # more -- because faceting by endpoint grows a column per endpoint on its own.
-  # You do not have to know the count in advance.
-  #
-  # Facet strips read best from a character label. If you declared several `dvid`
-  # columns, the last one (often a character NAME) is used; otherwise the single
-  # dvid column; otherwise a constant.
-  label_col <- if (length(roles$dvid) > 1L) {
-    roles$dvid[[length(roles$dvid)]]
-  } else if (!is.null(roles$dvid)) roles$dvid[[1L]] else NULL
+# The plot adapts to however many endpoints there are -- one PK, one PD, two,
+# more -- because faceting by endpoint grows a column per endpoint on its own.
+# You do not have to know the count in advance.
+#
+# Facet strips read best from a character label. If you declared several `dvid`
+# columns, the last one (often a character NAME) is used; otherwise the single
+# dvid column; otherwise a constant.
+label_col <- if (length(roles$dvid) > 1L) {
+  roles$dvid[[length(roles$dvid)]]
+} else if (!is.null(roles$dvid)) roles$dvid[[1L]] else NULL
 
-  frame <- function(d, label) {
-    keep <- d[[roles$evid]] == 0 & !is.na(d[[roles$dv]])   # observations only
-    data.frame(
-      dataset  = label,
-      id       = d[[roles$id]][keep],
-      time     = as.numeric(d[[roles$time]][keep]),
-      dv       = as.numeric(d[[roles$dv]][keep]),
-      endpoint = if (is.null(label_col)) "DV" else
-        as.character(d[[label_col]][keep]),
-      stringsAsFactors = FALSE
-    )
-  }
-  compare <- rbind(frame(raw, "source"), frame(synthetic, "synthetic"))
-
-  ggplot2::ggplot(compare, ggplot2::aes(time, dv, group = id)) +
-    ggplot2::geom_line(alpha = 0.3) +
-    ggplot2::geom_point(alpha = 0.4, size = 0.6) +
-    # rows: source vs synthetic. columns: one per endpoint, however many.
-    ggplot2::facet_grid(dataset ~ endpoint, scales = "free_y") +
-    ggplot2::labs(title = "RESTRICTED: source vs AVATAR synthetic",
-                  subtitle = "do not export", x = "Time", y = "DV") +
-    ggplot2::theme_bw()
-  # Concentrations often read better on a log axis. Add `+ scale_y_log10()`
-  # above if every DV is positive; a log scale drops zeros and negatives.
-} else {
-  message("ggplot2 not available; skipping the diagnostic plot.")
+frame <- function(d, label) {
+  keep <- d[[roles$evid]] == 0 & !is.na(d[[roles$dv]])   # observations only
+  data.frame(
+    dataset  = label,
+    id       = d[[roles$id]][keep],
+    time     = as.numeric(d[[roles$time]][keep]),
+    dv       = as.numeric(d[[roles$dv]][keep]),
+    endpoint = if (is.null(label_col)) "DV" else
+      as.character(d[[label_col]][keep]),
+    stringsAsFactors = FALSE
+  )
 }
+compare <- rbind(frame(raw, "source"), frame(synthetic, "synthetic"))
+
+ggplot(compare, aes(time, dv, group = id)) +
+  geom_line(alpha = 0.3) +
+  geom_point(alpha = 0.4, size = 0.6) +
+  # rows: source vs synthetic. columns: one per endpoint, however many.
+  facet_grid(dataset ~ endpoint, scales = "free_y") +
+  labs(title = "RESTRICTED: source vs AVATAR synthetic",
+       subtitle = "do not export", x = "Time", y = "DV") +
+  theme_bw()
+# Concentrations often read better on a log axis. Add `+ scale_y_log10()` above
+# if every DV is positive; a log scale drops zeros and negatives.
 ```
 
 The synthetic table carries no formal privacy guarantee; it is built by blending
