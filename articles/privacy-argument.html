@@ -105,7 +105,7 @@ privacy.</p>
 <div class="section level2">
 <h2 id="confidential-data-access-inventory">Confidential-data access inventory<a class="anchor" aria-label="anchor" href="#confidential-data-access-inventory"></a>
 </h2>
-<p><code><a href="../reference/fit_private_pmx.html">fit_private_pmx()</a></code> is the only exported synthesis
+<p><code><a href="../reference/synpmx_empirical.html">synpmx_empirical()</a></code> is the only exported synthesis
 function that accepts source data. Inside the fit, source data are
 accessed for the following bounded representations:</p>
 <table class="table">
@@ -161,10 +161,11 @@ structural validation also read the source inside the restricted fit.
 They must not be exposed as public diagnostics or logs. They either
 validate public assertions or stop the restricted process; they are not
 serialized into the fitted model.</p>
-<p><code><a href="../reference/generate_pmx.html">generate_pmx()</a></code>, <code><a href="../reference/validate_private_model.html">validate_private_model()</a></code>,
-<code><a href="../reference/privacy_report.html">privacy_report()</a></code>, and generated- data validation do not
-accept or consult source data. <code><a href="../reference/compare_pmx.html">compare_pmx()</a></code> does read
-source data, but every source-derived component is explicitly marked
+<p><code><a href="../reference/synpmx_generate.html">synpmx_generate()</a></code>,
+<code><a href="../reference/validate_private_model.html">validate_private_model()</a></code>, <code><a href="../reference/privacy_report.html">privacy_report()</a></code>,
+and generated- data validation do not accept or consult source data.
+<code><a href="../reference/compare_pmx.html">compare_pmx()</a></code> does read source data, but every
+source-derived component is explicitly marked
 <code>restricted_not_releasable</code>; it is outside the model’s DP
 release unless a separate approved mechanism is added.</p>
 </div>
@@ -249,7 +250,7 @@ sensitivity, and dimension. Finalization stops if composition exceeds
 the request. Every fit creates one release-ledger entry. Refitting the
 same source is a new release whose budget must be composed with all
 previous releases by organizational governance. Repeated
-<code><a href="../reference/generate_pmx.html">generate_pmx()</a></code> calls from one fitted model consume no
+<code><a href="../reference/synpmx_generate.html">synpmx_generate()</a></code> calls from one fitted model consume no
 additional budget.</p>
 </div>
 <div class="section level2">

@@ -21,7 +21,7 @@ The companion vignettes are
 ### AVATAR blending: synthetic data built out of real subjects
 
 The **default** method is
-[`synthesize_pmx()`](https://iamstein.github.io/synpmx/reference/synthesize_pmx.md),
+[`synpmx_avatar()`](https://iamstein.github.io/synpmx/reference/synpmx_avatar.md),
 AVATAR-style blending. “AVATAR” is a method name rather than an
 initialism: it comes from the patient-centric *avatarization*
 literature, in which each synthetic record (“avatar”) is constructed
@@ -56,9 +56,9 @@ real data with no privacy accounting at all.
 ### Differential privacy: a bound on what any one subject can change
 
 The **alternative** is the differentially private (DP) engines,
-[`fit_calibrated_pmx()`](https://iamstein.github.io/synpmx/reference/fit_calibrated_pmx.md)
+[`synpmx_calibrated()`](https://iamstein.github.io/synpmx/reference/synpmx_calibrated.md)
 and
-[`fit_private_pmx()`](https://iamstein.github.io/synpmx/reference/fit_private_pmx.md).
+[`synpmx_empirical()`](https://iamstein.github.io/synpmx/reference/synpmx_empirical.md).
 These never copy or blend a subject’s data into the output. Instead
 they:
 
@@ -148,7 +148,7 @@ The choice is a single question:
 
 - **Stays inside** the safe environment — you are the only consumer,
   governance and access controls apply → use **AVATAR**
-  ([`synthesize_pmx()`](https://iamstein.github.io/synpmx/reference/synthesize_pmx.md)).
+  ([`synpmx_avatar()`](https://iamstein.github.io/synpmx/reference/synpmx_avatar.md)).
   Its lack of a formal guarantee costs nothing, because there is no
   adversary to guarantee against.
 - **Crosses out** — shared with a partner or vendor, published, or moved
@@ -165,13 +165,13 @@ Both make a subject-level guarantee: neighboring datasets differing by
 one complete subject produce nearly indistinguishable output, so no one
 person’s participation can be inferred from the release.
 
-- **[`fit_calibrated_pmx()`](https://iamstein.github.io/synpmx/reference/fit_calibrated_pmx.md)**
+- **[`synpmx_calibrated()`](https://iamstein.github.io/synpmx/reference/synpmx_calibrated.md)**
   (structural correction). Asserts curve shape from a public structural
   model and privately calibrates only the exposure magnitude by a small
   correction factor. Because it releases very few quantities, it remains
   viable at small cohorts. This is the recommended DP path for
   early-phase studies.
-- **[`fit_private_pmx()`](https://iamstein.github.io/synpmx/reference/fit_private_pmx.md)**
+- **[`synpmx_empirical()`](https://iamstein.github.io/synpmx/reference/synpmx_empirical.md)**
   (dense grid). Releases a larger set of noised population summaries.
   Retained for large pooled corpora where its cost is affordable.
 
@@ -205,7 +205,7 @@ dp_backend_status()
 
 Everything below applies to the **differentially private** modes only.
 If your synthetic data stays inside a trusted environment, use
-[`synthesize_pmx()`](https://iamstein.github.io/synpmx/reference/synthesize_pmx.md)
+[`synpmx_avatar()`](https://iamstein.github.io/synpmx/reference/synpmx_avatar.md)
 and ignore epsilon entirely.
 
 Epsilon is the one-person influence limit: smaller means stronger
@@ -215,7 +215,7 @@ governance and threat modeling, not from whichever number makes a plot
 look best.
 
 For the structural-correction engine
-([`fit_calibrated_pmx()`](https://iamstein.github.io/synpmx/reference/fit_calibrated_pmx.md)),
+([`synpmx_calibrated()`](https://iamstein.github.io/synpmx/reference/synpmx_calibrated.md)),
 the usable accuracy is captured by one quantity:
 
 ``` math

@@ -44,7 +44,7 @@ roles <- pmx_roles(
   evid = "EVID", cmt = "CMT", covariates = "WT"
 )
 
-synthetic <- suppressWarnings(synthesize_pmx(theo_md, roles, seed = 101))
+synthetic <- suppressWarnings(synpmx_avatar(theo_md, roles, seed = 101))
 validate_pmx(synthetic, roles)$valid
 #> [1] TRUE
 head(synthetic, 4)
@@ -64,10 +64,10 @@ environment the source data came from.
 
 | Mode | Function | Output built from | Guarantee | Works at |
 |----|----|----|----|----|
-| **1. AVATAR blending** | [`synthesize_pmx()`](https://iamstein.github.io/synpmx/reference/synthesize_pmx.md) | Real subject templates and blended real trajectories | None; governance only | ~12 subjects up |
-| **2. Prior only** | [`pmx_generate()`](https://iamstein.github.io/synpmx/reference/pmx_generate.md) | A public model and protocol only | `epsilon = 0` (no data read) | Any (data-independent) |
-| **3. Calibration** | [`fit_calibrated_pmx()`](https://iamstein.github.io/synpmx/reference/fit_calibrated_pmx.md) | A public model, magnitude corrected by 2 private releases | `(epsilon, delta)` DP | ~20 subjects up |
-| **4. Empirical** | [`fit_private_pmx()`](https://iamstein.github.io/synpmx/reference/fit_private_pmx.md) | Dozens of noised population summaries | `(epsilon, delta)` DP | A few hundred up |
+| **1. AVATAR blending** | [`synpmx_avatar()`](https://iamstein.github.io/synpmx/reference/synpmx_avatar.md) | Real subject templates and blended real trajectories | None; governance only | ~12 subjects up |
+| **2. Prior only** | [`synpmx_prior()`](https://iamstein.github.io/synpmx/reference/synpmx_prior.md) | A public model and protocol only | `epsilon = 0` (no data read) | Any (data-independent) |
+| **3. Calibration** | [`synpmx_calibrated()`](https://iamstein.github.io/synpmx/reference/synpmx_calibrated.md) | A public model, magnitude corrected by 2 private releases | `(epsilon, delta)` DP | ~20 subjects up |
+| **4. Empirical** | [`synpmx_empirical()`](https://iamstein.github.io/synpmx/reference/synpmx_empirical.md) | Dozens of noised population summaries | `(epsilon, delta)` DP | A few hundred up |
 
 Two rules of thumb decide between them:
 

@@ -81,7 +81,7 @@ schema, with the mathematics, the edge cases, and a worked example.</p>
 <p>It is the companion to <code><a href="../articles/synpmx-method.html">vignette("synpmx-method")</a></code>, which
 introduces all four generation modes at a high level and says which one
 to reach for. Read that first. Come here when you need to defend, debug,
-or review what <code><a href="../reference/synthesize_pmx.html">synthesize_pmx()</a></code> actually did.</p>
+or review what <code><a href="../reference/synpmx_avatar.html">synpmx_avatar()</a></code> actually did.</p>
 <div class="section level2">
 <h2 id="step-1-declare-the-meaning-of-the-columns">Step 1: declare the meaning of the columns<a class="anchor" aria-label="anchor" href="#step-1-declare-the-meaning-of-the-columns"></a>
 </h2>
@@ -125,7 +125,7 @@ user must declare them with <code><a href="../reference/pmx_roles.html">pmx_role
 <code>dvid</code>, <code>mdv</code>, and <code>rate</code> are optional
 scalar roles; <code>covariates</code> can contain several baseline
 columns. One source column cannot be assigned to multiple roles.</p>
-<p>Immediately before generation, <code><a href="../reference/synthesize_pmx.html">synthesize_pmx()</a></code> calls
+<p>Immediately before generation, <code><a href="../reference/synpmx_avatar.html">synpmx_avatar()</a></code> calls
 <code>validate_pmx(..., strict = TRUE)</code>. Among other checks,
 validation requires:</p>
 <ul>
@@ -423,7 +423,7 @@ workaround: if it changes within subject, strict validation correctly
 rejects it as nonconstant.</p>
 <p>For now, a dataset with BLOQ records should be preprocessed under an
 explicit, documented analysis convention before calling
-<code><a href="../reference/synthesize_pmx.html">synthesize_pmx()</a></code>. Setting DV missing and using a nonzero
+<code><a href="../reference/synpmx_avatar.html">synpmx_avatar()</a></code>. Setting DV missing and using a nonzero
 declared MDV can retain an anchor’s missingness position, but this still
 does not synthesize a coherent censoring process. Users who need
 synthetic CENS/LLOQ semantics should treat that as unsupported package
@@ -787,8 +787,7 @@ small enough to inspect.</p>
 </table>
 <p>The next chunk uses internal helpers solely to expose a reproducible
 teaching trace. These helpers are not public API. Ordinary analysis code
-should call <code><a href="../reference/synthesize_pmx.html">synthesize_pmx()</a></code> rather than depend on
-them.</p>
+should call <code><a href="../reference/synpmx_avatar.html">synpmx_avatar()</a></code> rather than depend on them.</p>
 <p>With <code>seed = 2026</code>, the anchor and its selected compatible
 donors are:</p>
 <table class="table">
@@ -1161,13 +1160,13 @@ unavoidable; warn</td>
 </tr>
 </tbody>
 </table>
-<p>Other boundaries are deliberate. <code><a href="../reference/synthesize_pmx.html">synthesize_pmx()</a></code>
+<p>Other boundaries are deliberate. <code><a href="../reference/synpmx_avatar.html">synpmx_avatar()</a></code>
 supports only <code>event_method = "template"</code> and
 <code>dv_method = "avatar_blend"</code>. It does not fit a structural
 model, reconstruct covariate-parameter relationships, simulate
 occasions, enforce a dosing grammar beyond the sampled template, or
 provide a censoring model. Fitting an explicit structural model is the
-job of <code><a href="../reference/fit_calibrated_pmx.html">fit_calibrated_pmx()</a></code>, described below.</p>
+job of <code><a href="../reference/synpmx_calibrated.html">synpmx_calibrated()</a></code>, described below.</p>
 </div>
 <div class="section level2">
 <h2 id="relationship-to-avatar">Relationship to AVATAR<a class="anchor" aria-label="anchor" href="#relationship-to-avatar"></a>
@@ -1210,7 +1209,7 @@ attack-based privacy validation.</p>
 <div class="section level2">
 <h2 id="algorithm-summary">Algorithm summary<a class="anchor" aria-label="anchor" href="#algorithm-summary"></a>
 </h2>
-<p>For each call to <code><a href="../reference/synthesize_pmx.html">synthesize_pmx()</a></code>:</p>
+<p>For each call to <code><a href="../reference/synpmx_avatar.html">synpmx_avatar()</a></code>:</p>
 <ol style="list-style-type: decimal">
 <li>Validate source data, roles, and generator arguments.</li>
 <li>Compute first-event-relative time and endpoint-specific

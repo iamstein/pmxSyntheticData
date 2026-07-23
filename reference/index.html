@@ -48,7 +48,7 @@
     <div class="section level2">
       <h2 id="generating-data">Generating data<a class="anchor" aria-label="anchor" href="#generating-data"></a></h2>
 
-      <div class="section-desc"><p>The four generation modes. <code><a href="../reference/synthesize_pmx.html">synthesize_pmx()</a></code> is the default AVATAR path; the others require a public structural model.</p></div>
+      <div class="section-desc"><p>The four generation modes. <code><a href="../reference/synpmx_avatar.html">synpmx_avatar()</a></code> is the default AVATAR path; the others require a public structural model.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -57,38 +57,38 @@
 
       <dl><dt>
 
-          <code><a href="synthesize_pmx.html">synthesize_pmx()</a></code>
+          <code><a href="synpmx_avatar.html">synpmx_avatar()</a></code>
 
         </dt>
         <dd>Synthesize a structurally faithful PMX dataset (AVATAR-style)</dd>
 
         <dt>
 
-          <code><a href="pmx_generate.html">pmx_generate()</a></code>
+          <code><a href="synpmx_prior.html">synpmx_prior()</a></code>
 
         </dt>
-        <dd>Generate a synthetic PMX event table from a structural model</dd>
+        <dd>Generate a dataset from public inputs only</dd>
 
         <dt>
 
-          <code><a href="fit_calibrated_pmx.html">fit_calibrated_pmx()</a></code>
+          <code><a href="synpmx_calibrated.html">synpmx_calibrated()</a></code>
 
         </dt>
-        <dd>Calibrate a public structural model to confidential data</dd>
+        <dd>Generate a dataset from a privately calibrated structural model</dd>
 
         <dt>
 
-          <code><a href="fit_private_pmx.html">fit_private_pmx()</a></code>
+          <code><a href="synpmx_empirical.html">synpmx_empirical()</a></code>
 
         </dt>
-        <dd>Fit a subject-level differentially private PMX population generator</dd>
+        <dd>Generate a dataset from a dense differentially private release</dd>
 
         <dt>
 
-          <code><a href="generate_pmx.html">generate_pmx()</a></code>
+          <code><a href="synpmx_generate.html">synpmx_generate()</a></code>
 
         </dt>
-        <dd>Generate a new PMX event dataset from a fitted private model</dd>
+        <dd>Draw another dataset from a release already paid for</dd>
       </dl></div><div class="section level2">
       <h2 id="declaring-the-data">Declaring the data<a class="anchor" aria-label="anchor" href="#declaring-the-data"></a></h2>
 
@@ -132,7 +132,7 @@
           <code><a href="pmx_generated_roles.html">pmx_generated_roles()</a></code>
 
         </dt>
-        <dd>Roles for tables produced by <code><a href="../reference/pmx_generate.html">pmx_generate()</a></code></dd>
+        <dd>Roles for tables produced by <code><a href="../reference/dot-generate_structural.html">.generate_structural()</a></code></dd>
       </dl></div><div class="section level2">
       <h2 id="public-model-and-design-inputs">Public model and design inputs<a class="anchor" aria-label="anchor" href="#public-model-and-design-inputs"></a></h2>
 

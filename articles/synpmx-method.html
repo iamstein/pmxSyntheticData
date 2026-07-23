@@ -146,24 +146,24 @@ the four modes are most visible.</p>
 <h2 id="mode-1-avatar-blending">Mode 1: AVATAR blending<a class="anchor" aria-label="anchor" href="#mode-1-avatar-blending"></a>
 </h2>
 <p>Start here, because it is the least work.
-<code><a href="../reference/synthesize_pmx.html">synthesize_pmx()</a></code> needs nothing but the data and a
+<code><a href="../reference/synpmx_avatar.html">synpmx_avatar()</a></code> needs nothing but the data and a
 declaration of what the columns mean. For each synthetic subject it
 copies a real subject’s event skeleton, then fills the covariates and
 concentrations with a distance-weighted blend of that subject’s nearest
 compatible neighbors, plus noise.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">avatar</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/warning.html" class="external-link">suppressWarnings</a></span><span class="op">(</span><span class="fu"><a href="../reference/synthesize_pmx.html">synthesize_pmx</a></span><span class="op">(</span><span class="va">theo_md</span>, <span class="va">theo_roles</span>, seed <span class="op">=</span> <span class="fl">101</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">avatar</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/warning.html" class="external-link">suppressWarnings</a></span><span class="op">(</span><span class="fu"><a href="../reference/synpmx_avatar.html">synpmx_avatar</a></span><span class="op">(</span><span class="va">theo_md</span>, <span class="va">theo_roles</span>, seed <span class="op">=</span> <span class="fl">101</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/validate_pmx.html">validate_pmx</a></span><span class="op">(</span><span class="va">avatar</span>, <span class="va">theo_roles</span><span class="op">)</span><span class="op">$</span><span class="va">valid</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
 <p>Nothing was elicited, nothing was assumed, and the output keeps the
 source schema and cohort size. On a 12-subject dataset
-<code><a href="../reference/synthesize_pmx.html">synthesize_pmx()</a></code> also emits documented small-group fallback
+<code><a href="../reference/synpmx_avatar.html">synpmx_avatar()</a></code> also emits documented small-group fallback
 warnings (some event-pattern groups have only one usable donor); they
 are suppressed above and explained in the <a href="https://iamstein.github.io/synpmx/articles/avatar-mathematics.html">AVATAR
 mathematics article</a>.</p>
 <p>What you cannot say about this output is that it is anonymous. It is
 assembled from real trajectories, so it belongs inside the trusted
-environment that the source data came from.</p>
+environment.</p>
 </div>
 <div class="section level2">
 <h2 id="mode-2-prior-only">Mode 2: prior only<a class="anchor" aria-label="anchor" href="#mode-2-prior-only"></a>
@@ -187,7 +187,7 @@ the compound class, or the reasoning that set the starting dose.</p>
 <span>  n_doses <span class="op">=</span> <span class="fl">7</span>, dose_interval <span class="op">=</span> <span class="fl">24</span>,</span>
 <span>  source <span class="op">=</span> <span class="st">"illustrative protocol"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">prior_only</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pmx_generate.html">pmx_generate</a></span><span class="op">(</span><span class="va">theo_model</span>, <span class="va">theo_design</span>, n_subjects <span class="op">=</span> <span class="fl">12</span>, seed <span class="op">=</span> <span class="fl">202</span><span class="op">)</span></span>
+<span><span class="va">prior_only</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synpmx_prior.html">synpmx_prior</a></span><span class="op">(</span><span class="va">theo_model</span>, <span class="va">theo_design</span>, n_subjects <span class="op">=</span> <span class="fl">12</span>, seed <span class="op">=</span> <span class="fl">202</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">prior_only</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   ID      TIME NTIME       TAD OCC      DV AMT RATE EVID CMT DVID MDV CENS DOSE</span></span>
 <span><span class="co">#&gt; 1  1 0.0000000  0.00 0.0000000   1      NA 320    0    1   1 &lt;NA&gt;   1    0  320</span></span>
@@ -224,34 +224,40 @@ and a noised subject count.</p>
 answers “is this release worth its budget?” before any budget is
 spent.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">calibrated</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit_calibrated_pmx.html">fit_calibrated_pmx</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">calibrated_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synpmx_calibrated.html">synpmx_calibrated</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">theo_md</span>, roles <span class="op">=</span> <span class="va">theo_roles</span>, model <span class="op">=</span> <span class="va">theo_model</span>,</span>
-<span>  design <span class="op">=</span> <span class="va">theo_design</span>, priors <span class="op">=</span> <span class="va">priors</span>, epsilon <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  design <span class="op">=</span> <span class="va">theo_design</span>, priors <span class="op">=</span> <span class="va">priors</span>, epsilon <span class="op">=</span> <span class="fl">1</span>, seed <span class="op">=</span> <span class="fl">303</span>,</span>
 <span>  backend <span class="op">=</span> <span class="st">"public"</span>, public_source <span class="op">=</span> <span class="cn">TRUE</span>   <span class="co"># theo_md is public; no DP claim</span></span>
-<span><span class="op">)</span></span>
-<span><span class="va">calibrated</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>The correction pulled the assumed clearance toward the data. The
+release that produced this dataset travels with it, so the accounting is
+always at hand:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">calibrated_data</span>, <span class="st">"synpmx_release"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Calibrated structural model (v3)</span></span>
 <span><span class="co">#&gt;   released subject count: 12</span></span>
 <span><span class="co">#&gt;   pk correction: 0.669x</span></span>
 <span><span class="co">#&gt;   corrected typical: cl=4.01, v=35, ka=1.5</span></span>
 <span><span class="co">#&gt;   epsilon: 1  (formal DP: FALSE)</span></span>
-<span><span class="co">#&gt;   f = 0.167 (worthwhile)</span></span>
-<span><span class="va">calibrated_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pmx_generate.html">pmx_generate</a></span><span class="op">(</span><span class="va">calibrated</span>, seed <span class="op">=</span> <span class="fl">303</span><span class="op">)</span></span></code></pre></div>
-<p>The correction pulled the assumed clearance toward the data.
-Generation is post-processing on the released numbers, so drawing more
-datasets from one fit spends no additional budget.</p>
+<span><span class="co">#&gt;   f = 0.167 (worthwhile)</span></span></code></pre></div>
+<p>Generation from that release is post-processing, so further datasets
+cost nothing. Draw them with <code><a href="../reference/synpmx_generate.html">synpmx_generate()</a></code> rather than
+by calling <code><a href="../reference/synpmx_calibrated.html">synpmx_calibrated()</a></code> again — a second fit would
+spend the budget a second time.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">another</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synpmx_generate.html">synpmx_generate</a></span><span class="op">(</span><span class="va">calibrated_data</span>, seed <span class="op">=</span> <span class="fl">304</span><span class="op">)</span>   <span class="co"># spends nothing</span></span></code></pre></div>
 <p>Two honest notes. First, <code>backend = "public"</code> is used here
 because <code>theo_md</code> is already public: it makes the release
 <strong>noiseless</strong> and therefore makes no DP claim, which the
 printed model states. A confidential fit uses the default validated
 backend and fails closed if it is unavailable:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">calibrated</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit_calibrated_pmx.html">fit_calibrated_pmx</a></span><span class="op">(</span></span>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">calibrated</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synpmx_calibrated.html">synpmx_calibrated</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">confidential</span>, roles <span class="op">=</span> <span class="va">theo_roles</span>, model <span class="op">=</span> <span class="va">theo_model</span>,</span>
 <span>  design <span class="op">=</span> <span class="va">theo_design</span>, priors <span class="op">=</span> <span class="va">priors</span>, epsilon <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  backend <span class="op">=</span> <span class="st">"opendp"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/dp_backend_status.html">dp_backend_status</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   backend available version production</span></span>
 <span><span class="co">#&gt; 1  OpenDP      TRUE  0.15.1       TRUE</span></span></code></pre></div>
@@ -274,8 +280,8 @@ contain, and pays for it by splitting one epsilon across many released
 quantities.</p>
 <p>It also needs the most declaration: every clipping range,
 contribution limit, and budget share is an explicit public input.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">empirical</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit_private_pmx.html">fit_private_pmx</a></span><span class="op">(</span></span>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">empirical_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synpmx_empirical.html">synpmx_empirical</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">theo_md</span>, roles <span class="op">=</span> <span class="va">theo_roles</span>,</span>
 <span>  endpoints <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>cp <span class="op">=</span> <span class="fu"><a href="../reference/pmx_endpoint.html">pmx_endpoint</a></span><span class="op">(</span></span>
 <span>    alignment <span class="op">=</span> <span class="st">"dose_relative"</span>, transform <span class="op">=</span> <span class="st">"log"</span>, shape <span class="op">=</span> <span class="st">"occasion"</span>, cmt <span class="op">=</span> <span class="fl">2</span></span>
@@ -293,10 +299,10 @@ contribution limit, and budget share is an explicit public input.</p>
 <span>    subject_count <span class="op">=</span> <span class="fl">0.10</span>, event <span class="op">=</span> <span class="fl">0.15</span>, timing <span class="op">=</span> <span class="fl">0.15</span>,</span>
 <span>    covariates <span class="op">=</span> <span class="fl">0.10</span>, endpoints <span class="op">=</span> <span class="fl">0.50</span>, censoring <span class="op">=</span> <span class="fl">0</span></span>
 <span>  <span class="op">)</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">404</span>,</span>
 <span>  backend <span class="op">=</span> <span class="st">"public"</span>, public_source <span class="op">=</span> <span class="cn">TRUE</span>   <span class="co"># theo_md is public; no DP claim</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">empirical_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_pmx.html">generate_pmx</a></span><span class="op">(</span><span class="va">empirical</span>, seed <span class="op">=</span> <span class="fl">404</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/privacy_report.html">privacy_report</a></span><span class="op">(</span><span class="va">empirical</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/privacy_report.html">privacy_report</a></span><span class="op">(</span><span class="va">empirical_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt; No DP claim: the input was explicitly asserted to be a public fixture.</span></span>
 <span><span class="co">#&gt; Privacy unit: one subject's complete bounded longitudinal contribution</span></span>
 <span><span class="co">#&gt; Adjacency: add-or-remove one complete subject</span></span>
@@ -312,7 +318,7 @@ corpora, not on twelve subjects.</p>
 <div class="section level2">
 <h2 id="the-four-side-by-side">The four side by side<a class="anchor" aria-label="anchor" href="#the-four-side-by-side"></a>
 </h2>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">generated_roles</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pmx_generated_roles.html">pmx_generated_roles</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">all_observations</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span>
 <span>  <span class="fu">observations</span><span class="op">(</span><span class="va">theo_md</span>, <span class="va">theo_roles</span>, <span class="st">"Source"</span><span class="op">)</span>,</span>
@@ -384,7 +390,7 @@ corpora, not on twelve subjects.</p>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">all_observations</span>,</span>
 <span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">dv</span>, group <span class="op">=</span> <span class="va">subject</span><span class="op">)</span></span>
@@ -407,14 +413,14 @@ size the noise is visible.</p>
 <div class="section level2">
 <h2 id="choosing-a-mode">Choosing a mode<a class="anchor" aria-label="anchor" href="#choosing-a-mode"></a>
 </h2>
-<table class="table">
+<table style="width:100%;" class="table">
 <colgroup>
-<col width="9%">
-<col width="18%">
-<col width="28%">
-<col width="13%">
-<col width="11%">
-<col width="19%">
+<col width="10%">
+<col width="10%">
+<col width="31%">
+<col width="14%">
+<col width="12%">
+<col width="21%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">Mode</th>
@@ -427,7 +433,7 @@ size the noise is visible.</p>
 <tbody>
 <tr class="odd">
 <td align="left">1. AVATAR blending</td>
-<td align="left">synthesize_pmx()</td>
+<td align="left">synpmx_avatar()</td>
 <td align="left">Real subject templates and blended real
 trajectories</td>
 <td align="left">None; governance only</td>
@@ -436,7 +442,7 @@ trajectories</td>
 </tr>
 <tr class="even">
 <td align="left">2. Prior only</td>
-<td align="left">pmx_generate(model, design)</td>
+<td align="left">synpmx_prior()</td>
 <td align="left">A public model and protocol only</td>
 <td align="left">epsilon = 0 (no data read)</td>
 <td align="left">Any (data-independent)</td>
@@ -444,7 +450,7 @@ trajectories</td>
 </tr>
 <tr class="odd">
 <td align="left">3. Calibration</td>
-<td align="left">fit_calibrated_pmx() + pmx_generate()</td>
+<td align="left">synpmx_calibrated()</td>
 <td align="left">A public model, magnitude corrected by 2 private
 releases</td>
 <td align="left">(epsilon, delta) DP</td>
@@ -453,7 +459,7 @@ releases</td>
 </tr>
 <tr class="even">
 <td align="left">4. Empirical</td>
-<td align="left">fit_private_pmx() + generate_pmx()</td>
+<td align="left">synpmx_empirical()</td>
 <td align="left">Dozens of noised population summaries</td>
 <td align="left">(epsilon, delta) DP</td>
 <td align="left">A few hundred and up</td>
@@ -569,7 +575,7 @@ trajectory reaches the output. They read the confidential data only
 through per-subject contributions clipped to publicly declared ranges,
 release those aggregates with calibrated noise, and generate from the
 noised numbers alone. They differ in what supplies the curve shape.</p>
-<p><code><a href="../reference/fit_calibrated_pmx.html">fit_calibrated_pmx()</a></code> takes shape from a <strong>public
+<p><code><a href="../reference/synpmx_calibrated.html">synpmx_calibrated()</a></code> takes shape from a <strong>public
 structural model</strong> — a closed-form one-compartment or
 two-compartment PK model, evaluated analytically rather than by solving
 ordinary differential equations (ODEs) — and spends budget only on
@@ -590,7 +596,7 @@ quantity stays small, which is why this engine remains usable at 20 to
 covariate relationships come from the public model, so the output is
 only as realistic as that model. It cannot reveal a structural feature
 the model does not contain.</p>
-<p><code><a href="../reference/fit_private_pmx.html">fit_private_pmx()</a></code> instead reconstructs shape from a
+<p><code><a href="../reference/synpmx_empirical.html">synpmx_empirical()</a></code> instead reconstructs shape from a
 denser set of noised summaries. It asserts less — trajectory shape is
 measured rather than assumed — but it releases far more numbers, so the
 same epsilon is split many ways. Utility therefore collapses below a few

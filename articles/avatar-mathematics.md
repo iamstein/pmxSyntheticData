@@ -9,7 +9,7 @@ It is the companion to
 which introduces all four generation modes at a high level and says
 which one to reach for. Read that first. Come here when you need to
 defend, debug, or review what
-[`synthesize_pmx()`](https://iamstein.github.io/synpmx/reference/synthesize_pmx.md)
+[`synpmx_avatar()`](https://iamstein.github.io/synpmx/reference/synpmx_avatar.md)
 actually did.
 
 ## Step 1: declare the meaning of the columns
@@ -60,7 +60,7 @@ several baseline columns. One source column cannot be assigned to
 multiple roles.
 
 Immediately before generation,
-[`synthesize_pmx()`](https://iamstein.github.io/synpmx/reference/synthesize_pmx.md)
+[`synpmx_avatar()`](https://iamstein.github.io/synpmx/reference/synpmx_avatar.md)
 calls `validate_pmx(..., strict = TRUE)`. Among other checks, validation
 requires:
 
@@ -321,7 +321,7 @@ nonconstant.
 
 For now, a dataset with BLOQ records should be preprocessed under an
 explicit, documented analysis convention before calling
-[`synthesize_pmx()`](https://iamstein.github.io/synpmx/reference/synthesize_pmx.md).
+[`synpmx_avatar()`](https://iamstein.github.io/synpmx/reference/synpmx_avatar.md).
 Setting DV missing and using a nonzero declared MDV can retain an
 anchor’s missingness position, but this still does not synthesize a
 coherent censoring process. Users who need synthetic CENS/LLOQ semantics
@@ -565,7 +565,7 @@ The first two source subjects {.table}
 The next chunk uses internal helpers solely to expose a reproducible
 teaching trace. These helpers are not public API. Ordinary analysis code
 should call
-[`synthesize_pmx()`](https://iamstein.github.io/synpmx/reference/synthesize_pmx.md)
+[`synpmx_avatar()`](https://iamstein.github.io/synpmx/reference/synpmx_avatar.md)
 rather than depend on them.
 
 With `seed = 2026`, the anchor and its selected compatible donors are:
@@ -711,13 +711,13 @@ output over a silent incompatible blend.
 | Nonstandard MDV convention | Copy anchor MDV values rather than re-derive them |
 
 Other boundaries are deliberate.
-[`synthesize_pmx()`](https://iamstein.github.io/synpmx/reference/synthesize_pmx.md)
+[`synpmx_avatar()`](https://iamstein.github.io/synpmx/reference/synpmx_avatar.md)
 supports only `event_method = "template"` and
 `dv_method = "avatar_blend"`. It does not fit a structural model,
 reconstruct covariate-parameter relationships, simulate occasions,
 enforce a dosing grammar beyond the sampled template, or provide a
 censoring model. Fitting an explicit structural model is the job of
-[`fit_calibrated_pmx()`](https://iamstein.github.io/synpmx/reference/fit_calibrated_pmx.md),
+[`synpmx_calibrated()`](https://iamstein.github.io/synpmx/reference/synpmx_calibrated.md),
 described below.
 
 ## Relationship to AVATAR
@@ -761,7 +761,7 @@ privacy validation.
 ## Algorithm summary
 
 For each call to
-[`synthesize_pmx()`](https://iamstein.github.io/synpmx/reference/synthesize_pmx.md):
+[`synpmx_avatar()`](https://iamstein.github.io/synpmx/reference/synpmx_avatar.md):
 
 1.  Validate source data, roles, and generator arguments.
 2.  Compute first-event-relative time and endpoint-specific

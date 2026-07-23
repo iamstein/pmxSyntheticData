@@ -67,7 +67,7 @@ str(theo_md)
 ## Mode 1: AVATAR blending
 
 Start here, because it is the least work.
-[`synthesize_pmx()`](https://iamstein.github.io/synpmx/reference/synthesize_pmx.md)
+[`synpmx_avatar()`](https://iamstein.github.io/synpmx/reference/synpmx_avatar.md)
 needs nothing but the data and a declaration of what the columns mean.
 For each synthetic subject it copies a real subject’s event skeleton,
 then fills the covariates and concentrations with a distance-weighted
@@ -75,14 +75,14 @@ blend of that subject’s nearest compatible neighbors, plus noise.
 
 ``` r
 
-avatar <- suppressWarnings(synthesize_pmx(theo_md, theo_roles, seed = 101))
+avatar <- suppressWarnings(synpmx_avatar(theo_md, theo_roles, seed = 101))
 validate_pmx(avatar, theo_roles)$valid
 #> [1] TRUE
 ```
 
 Nothing was elicited, nothing was assumed, and the output keeps the
 source schema and cohort size. On a 12-subject dataset
-[`synthesize_pmx()`](https://iamstein.github.io/synpmx/reference/synthesize_pmx.md)
+[`synpmx_avatar()`](https://iamstein.github.io/synpmx/reference/synpmx_avatar.md)
 also emits documented small-group fallback warnings (some event-pattern
 groups have only one usable donor); they are suppressed above and
 explained in the [AVATAR mathematics
@@ -90,7 +90,7 @@ article](https://iamstein.github.io/synpmx/articles/avatar-mathematics.html).
 
 What you cannot say about this output is that it is anonymous. It is
 assembled from real trajectories, so it belongs inside the trusted
-environment that the source data came from.
+environment.
 
 ## Mode 2: prior only
 
@@ -116,7 +116,7 @@ theo_design <- pmx_trial_design(
   n_doses = 7, dose_interval = 24,
   source = "illustrative protocol"
 )
-prior_only <- pmx_generate(theo_model, theo_design, n_subjects = 12, seed = 202)
+prior_only <- synpmx_prior(theo_model, theo_design, n_subjects = 12, seed = 202)
 head(prior_only, 3)
 #>   ID      TIME NTIME       TAD OCC      DV AMT RATE EVID CMT DVID MDV CENS DOSE
 #> 1  1 0.0000000  0.00 0.0000000   1      NA 320    0    1   1 <NA>   1    0  320
@@ -161,24 +161,39 @@ budget?” before any budget is spent.
 
 ``` r
 
-calibrated <- fit_calibrated_pmx(
+calibrated_data <- synpmx_calibrated(
   data = theo_md, roles = theo_roles, model = theo_model,
-  design = theo_design, priors = priors, epsilon = 1,
+  design = theo_design, priors = priors, epsilon = 1, seed = 303,
   backend = "public", public_source = TRUE   # theo_md is public; no DP claim
 )
-calibrated
+```
+
+The correction pulled the assumed clearance toward the data. The release
+that produced this dataset travels with it, so the accounting is always
+at hand:
+
+``` r
+
+attr(calibrated_data, "synpmx_release")
 #> Calibrated structural model (v3)
 #>   released subject count: 12
 #>   pk correction: 0.669x
 #>   corrected typical: cl=4.01, v=35, ka=1.5
 #>   epsilon: 1  (formal DP: FALSE)
 #>   f = 0.167 (worthwhile)
-calibrated_data <- pmx_generate(calibrated, seed = 303)
 ```
 
-The correction pulled the assumed clearance toward the data. Generation
-is post-processing on the released numbers, so drawing more datasets
-from one fit spends no additional budget.
+Generation from that release is post-processing, so further datasets
+cost nothing. Draw them with
+[`synpmx_generate()`](https://iamstein.github.io/synpmx/reference/synpmx_generate.md)
+rather than by calling
+[`synpmx_calibrated()`](https://iamstein.github.io/synpmx/reference/synpmx_calibrated.md)
+again — a second fit would spend the budget a second time.
+
+``` r
+
+another <- synpmx_generate(calibrated_data, seed = 304)   # spends nothing
+```
 
 Two honest notes. First, `backend = "public"` is used here because
 `theo_md` is already public: it makes the release **noiseless** and
@@ -188,7 +203,7 @@ it is unavailable:
 
 ``` r
 
-calibrated <- fit_calibrated_pmx(
+calibrated <- synpmx_calibrated(
   data = confidential, roles = theo_roles, model = theo_model,
   design = theo_design, priors = priors, epsilon = 1,
   backend = "opendp"
@@ -224,7 +239,7 @@ limit, and budget share is an explicit public input.
 
 ``` r
 
-empirical <- fit_private_pmx(
+empirical_data <- synpmx_empirical(
   data = theo_md, roles = theo_roles,
   endpoints = list(cp = pmx_endpoint(
     alignment = "dose_relative", transform = "log", shape = "occasion", cmt = 2
@@ -242,10 +257,10 @@ empirical <- fit_private_pmx(
     subject_count = 0.10, event = 0.15, timing = 0.15,
     covariates = 0.10, endpoints = 0.50, censoring = 0
   ),
+  seed = 404,
   backend = "public", public_source = TRUE   # theo_md is public; no DP claim
 )
-empirical_data <- generate_pmx(empirical, seed = 404)
-privacy_report(empirical)
+privacy_report(empirical_data)
 #> No DP claim: the input was explicitly asserted to be a public fixture.
 #> Privacy unit: one subject's complete bounded longitudinal contribution
 #> Adjacency: add-or-remove one complete subject
@@ -328,10 +343,10 @@ size the noise is visible.
 
 | Mode | Function | Output built from | Guarantee | Cohort size | Elicitation needed |
 |:---|:---|:---|:---|:---|:---|
-| 1\. AVATAR blending | synthesize_pmx() | Real subject templates and blended real trajectories | None; governance only | Any, from ~12 | None |
-| 2\. Prior only | pmx_generate(model, design) | A public model and protocol only | epsilon = 0 (no data read) | Any (data-independent) | Structural model + protocol |
-| 3\. Calibration | fit_calibrated_pmx() + pmx_generate() | A public model, magnitude corrected by 2 private releases | (epsilon, delta) DP | ~20 and up | Model, protocol, prior ranges |
-| 4\. Empirical | fit_private_pmx() + generate_pmx() | Dozens of noised population summaries | (epsilon, delta) DP | A few hundred and up | Endpoints, bounds, limits, budget split |
+| 1\. AVATAR blending | synpmx_avatar() | Real subject templates and blended real trajectories | None; governance only | Any, from ~12 | None |
+| 2\. Prior only | synpmx_prior() | A public model and protocol only | epsilon = 0 (no data read) | Any (data-independent) | Structural model + protocol |
+| 3\. Calibration | synpmx_calibrated() | A public model, magnitude corrected by 2 private releases | (epsilon, delta) DP | ~20 and up | Model, protocol, prior ranges |
+| 4\. Empirical | synpmx_empirical() | Dozens of noised population summaries | (epsilon, delta) DP | A few hundred and up | Endpoints, bounds, limits, budget split |
 
 Where each mode belongs:
 
@@ -403,7 +418,7 @@ publicly declared ranges, release those aggregates with calibrated
 noise, and generate from the noised numbers alone. They differ in what
 supplies the curve shape.
 
-[`fit_calibrated_pmx()`](https://iamstein.github.io/synpmx/reference/fit_calibrated_pmx.md)
+[`synpmx_calibrated()`](https://iamstein.github.io/synpmx/reference/synpmx_calibrated.md)
 takes shape from a **public structural model** — a closed-form
 one-compartment or two-compartment PK model, evaluated analytically
 rather than by solving ordinary differential equations (ODEs) — and
@@ -422,7 +437,7 @@ variability, residual error, and covariate relationships come from the
 public model, so the output is only as realistic as that model. It
 cannot reveal a structural feature the model does not contain.
 
-[`fit_private_pmx()`](https://iamstein.github.io/synpmx/reference/fit_private_pmx.md)
+[`synpmx_empirical()`](https://iamstein.github.io/synpmx/reference/synpmx_empirical.md)
 instead reconstructs shape from a denser set of noised summaries. It
 asserts less — trajectory shape is measured rather than assumed — but it
 releases far more numbers, so the same epsilon is split many ways.

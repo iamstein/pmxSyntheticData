@@ -265,18 +265,18 @@ the real data later.</p>
 synpmx” vignette applies all four to one dataset side by side:</p>
 <ul>
 <li>
-<strong>AVATAR blending</strong> (<code><a href="../reference/synthesize_pmx.html">synthesize_pmx()</a></code>) —
+<strong>AVATAR blending</strong> (<code><a href="../reference/synpmx_avatar.html">synpmx_avatar()</a></code>) —
 build each synthetic subject from real subjects. No elicitation, no
 formal privacy guarantee.</li>
 <li>
-<strong>Prior only</strong> (<code><a href="../reference/pmx_generate.html">pmx_generate()</a></code> on a public
+<strong>Prior only</strong> (<code><a href="../reference/synpmx_prior.html">synpmx_prior()</a></code> on a public
 structural model) — read no data at all.</li>
 <li>
-<strong>Calibration</strong> (<code><a href="../reference/fit_calibrated_pmx.html">fit_calibrated_pmx()</a></code>) —
+<strong>Calibration</strong> (<code><a href="../reference/synpmx_calibrated.html">synpmx_calibrated()</a></code>) —
 simulate from a public structural model whose magnitude is corrected by
 a small differentially private release.</li>
 <li>
-<strong>Empirical</strong> (<code><a href="../reference/fit_private_pmx.html">fit_private_pmx()</a></code>) —
+<strong>Empirical</strong> (<code><a href="../reference/synpmx_empirical.html">synpmx_empirical()</a></code>) —
 release a dense set of differentially private summaries and rebuild
 subjects from them.</li>
 </ul>
@@ -305,7 +305,7 @@ the tradeoff behind it.</p>
 <p>Every example follows the same three steps:</p>
 <ol style="list-style-type: decimal">
 <li>declare column meanings with <code><a href="../reference/pmx_roles.html">pmx_roles()</a></code>;</li>
-<li>synthesize with <code><a href="../reference/synthesize_pmx.html">synthesize_pmx()</a></code>;</li>
+<li>synthesize with <code><a href="../reference/synpmx_avatar.html">synpmx_avatar()</a></code>;</li>
 <li>validate structure with <code><a href="../reference/validate_pmx.html">validate_pmx()</a></code> and compare to
 the source.</li>
 </ol>
@@ -324,7 +324,7 @@ a single concentration endpoint.</p>
 <span>  id <span class="op">=</span> <span class="st">"ID"</span>, time <span class="op">=</span> <span class="st">"TIME"</span>, dv <span class="op">=</span> <span class="st">"DV"</span>, amt <span class="op">=</span> <span class="st">"AMT"</span>,</span>
 <span>  evid <span class="op">=</span> <span class="st">"EVID"</span>, cmt <span class="op">=</span> <span class="st">"CMT"</span>, covariates <span class="op">=</span> <span class="st">"WT"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">theo_synth</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synthesize_pmx.html">synthesize_pmx</a></span><span class="op">(</span><span class="va">theo_md</span>, <span class="va">theo_roles</span>, seed <span class="op">=</span> <span class="fl">303</span><span class="op">)</span></span>
+<span><span class="va">theo_synth</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synpmx_avatar.html">synpmx_avatar</a></span><span class="op">(</span><span class="va">theo_md</span>, <span class="va">theo_roles</span>, seed <span class="op">=</span> <span class="fl">303</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Synthetic generation used documented small-group/profile fallbacks:</span></span>
 <span><span class="co">#&gt; - `k` was reduced to 1 in at least one compatible event-pattern group.</span></span>
 <span><span class="co">#&gt; - A compatible event-pattern group supplied fewer than two non-anchor donors.</span></span>
@@ -583,7 +583,7 @@ Both endpoints and all subjects are retained.</p>
 <span>  id <span class="op">=</span> <span class="st">"id"</span>, time <span class="op">=</span> <span class="st">"time"</span>, dv <span class="op">=</span> <span class="st">"dv"</span>, amt <span class="op">=</span> <span class="st">"amt"</span>, evid <span class="op">=</span> <span class="st">"evid"</span>,</span>
 <span>  dvid <span class="op">=</span> <span class="st">"dvid"</span>, covariates <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"wt"</span>, <span class="st">"age"</span>, <span class="st">"sex"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">warfarin_synth</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synthesize_pmx.html">synthesize_pmx</a></span><span class="op">(</span><span class="va">warfarin</span>, <span class="va">warfarin_roles</span>, seed <span class="op">=</span> <span class="fl">404</span><span class="op">)</span></span>
+<span><span class="va">warfarin_synth</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synpmx_avatar.html">synpmx_avatar</a></span><span class="op">(</span><span class="va">warfarin</span>, <span class="va">warfarin_roles</span>, seed <span class="op">=</span> <span class="fl">404</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Synthetic generation used documented small-group/profile fallbacks:</span></span>
 <span><span class="co">#&gt; - A compatible event-pattern group contained only its anchor; the anchor was used as the sole measurement donor and randomized noise supplied the only trajectory perturbation.</span></span>
 <span><span class="co">#&gt; - `k` was reduced to 1 in at least one compatible event-pattern group.</span></span>
@@ -862,7 +862,7 @@ Both endpoints and all subjects are retained.</p>
 <p><code>wbcSim</code> has infusion start/stop events and a study-time
 white-blood-cell response with a delayed decline, nadir, and recovery.
 Some source dosing schedules are unique; when a compatible event-pattern
-group contains only its anchor, <code><a href="../reference/synthesize_pmx.html">synthesize_pmx()</a></code> uses that
+group contains only its anchor, <code><a href="../reference/synpmx_avatar.html">synpmx_avatar()</a></code> uses that
 anchor as the sole donor and randomized noise supplies the perturbation,
 which it reports through a warning.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
@@ -870,7 +870,7 @@ which it reports through a warning.</p>
 <span><span class="va">wbc_roles</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pmx_roles.html">pmx_roles</a></span><span class="op">(</span></span>
 <span>  id <span class="op">=</span> <span class="st">"ID"</span>, time <span class="op">=</span> <span class="st">"TIME"</span>, dv <span class="op">=</span> <span class="st">"DV"</span>, amt <span class="op">=</span> <span class="st">"AMT"</span>, evid <span class="op">=</span> <span class="st">"EVID"</span>, cmt <span class="op">=</span> <span class="st">"CMT"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">wbc_synth</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/warning.html" class="external-link">suppressWarnings</a></span><span class="op">(</span><span class="fu"><a href="../reference/synthesize_pmx.html">synthesize_pmx</a></span><span class="op">(</span><span class="va">wbcSim</span>, <span class="va">wbc_roles</span>, seed <span class="op">=</span> <span class="fl">505</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">wbc_synth</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/warning.html" class="external-link">suppressWarnings</a></span><span class="op">(</span><span class="fu"><a href="../reference/synpmx_avatar.html">synpmx_avatar</a></span><span class="op">(</span><span class="va">wbcSim</span>, <span class="va">wbc_roles</span>, seed <span class="op">=</span> <span class="fl">505</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/validate_pmx.html">validate_pmx</a></span><span class="op">(</span><span class="va">wbc_synth</span>, <span class="va">wbc_roles</span><span class="op">)</span><span class="op">$</span><span class="va">valid</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
@@ -963,7 +963,7 @@ as a subject property.</p>
 <span>  covariates <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BSA"</span>, <span class="st">"AGE"</span>, <span class="st">"HGT"</span><span class="op">)</span>, subject_properties <span class="op">=</span> <span class="st">"DOS"</span>,</span>
 <span>  exclude <span class="op">=</span> <span class="st">"WGT"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">nimo_synth</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/warning.html" class="external-link">suppressWarnings</a></span><span class="op">(</span><span class="fu"><a href="../reference/synthesize_pmx.html">synthesize_pmx</a></span><span class="op">(</span><span class="va">nimoData</span>, <span class="va">nimo_roles</span>, seed <span class="op">=</span> <span class="fl">606</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">nimo_synth</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/warning.html" class="external-link">suppressWarnings</a></span><span class="op">(</span><span class="fu"><a href="../reference/synpmx_avatar.html">synpmx_avatar</a></span><span class="op">(</span><span class="va">nimoData</span>, <span class="va">nimo_roles</span>, seed <span class="op">=</span> <span class="fl">606</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/validate_pmx.html">validate_pmx</a></span><span class="op">(</span><span class="va">nimo_synth</span>, <span class="va">nimo_roles</span><span class="op">)</span><span class="op">$</span><span class="va">valid</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
@@ -1056,7 +1056,7 @@ rows. The reset clock validates within ID and occasion.</p>
 <span>  cmt <span class="op">=</span> <span class="st">"CMT"</span>, rate <span class="op">=</span> <span class="st">"RATE"</span>, mdv <span class="op">=</span> <span class="st">"MDV"</span>, occasion <span class="op">=</span> <span class="st">"OCC"</span>,</span>
 <span>  assigned_dose <span class="op">=</span> <span class="st">"DOSE"</span>, covariates <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"AGE"</span>, <span class="st">"SEX"</span>, <span class="st">"WT"</span>, <span class="st">"HT"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">mavo_synth</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/warning.html" class="external-link">suppressWarnings</a></span><span class="op">(</span><span class="fu"><a href="../reference/synthesize_pmx.html">synthesize_pmx</a></span><span class="op">(</span><span class="va">mavoglurant</span>, <span class="va">mavo_roles</span>,</span>
+<span><span class="va">mavo_synth</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/warning.html" class="external-link">suppressWarnings</a></span><span class="op">(</span><span class="fu"><a href="../reference/synpmx_avatar.html">synpmx_avatar</a></span><span class="op">(</span><span class="va">mavoglurant</span>, <span class="va">mavo_roles</span>,</span>
 <span>                                              seed <span class="op">=</span> <span class="fl">707</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/validate_pmx.html">validate_pmx</a></span><span class="op">(</span><span class="va">mavo_synth</span>, <span class="va">mavo_roles</span><span class="op">)</span><span class="op">$</span><span class="va">valid</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span>
@@ -1155,7 +1155,7 @@ must be declared, and what is bought.</p>
 through noised summaries. Every clipping range, contribution limit, and
 budget share is an explicit public input:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">theo_empirical</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit_private_pmx.html">fit_private_pmx</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">theo_private</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synpmx_empirical.html">synpmx_empirical</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">theo_md</span>, roles <span class="op">=</span> <span class="va">theo_roles</span>,</span>
 <span>  endpoints <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>cp <span class="op">=</span> <span class="fu"><a href="../reference/pmx_endpoint.html">pmx_endpoint</a></span><span class="op">(</span></span>
 <span>    alignment <span class="op">=</span> <span class="st">"dose_relative"</span>, transform <span class="op">=</span> <span class="st">"log"</span>, shape <span class="op">=</span> <span class="st">"occasion"</span>, cmt <span class="op">=</span> <span class="fl">2</span></span>
@@ -1173,12 +1173,12 @@ budget share is an explicit public input:</p>
 <span>    subject_count <span class="op">=</span> <span class="fl">0.10</span>, event <span class="op">=</span> <span class="fl">0.15</span>, timing <span class="op">=</span> <span class="fl">0.15</span>,</span>
 <span>    covariates <span class="op">=</span> <span class="fl">0.10</span>, endpoints <span class="op">=</span> <span class="fl">0.50</span>, censoring <span class="op">=</span> <span class="fl">0</span></span>
 <span>  <span class="op">)</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">707</span>,</span>
 <span>  backend <span class="op">=</span> <span class="st">"public"</span>, public_source <span class="op">=</span> <span class="cn">TRUE</span>   <span class="co"># theo_md is public; no DP claim</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">theo_private</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_pmx.html">generate_pmx</a></span><span class="op">(</span><span class="va">theo_empirical</span>, seed <span class="op">=</span> <span class="fl">707</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/validate_pmx.html">validate_pmx</a></span><span class="op">(</span><span class="va">theo_private</span>, <span class="va">theo_roles</span><span class="op">)</span><span class="op">$</span><span class="va">valid</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span>
-<span><span class="fu"><a href="../reference/sampling_summary.html">sampling_summary</a></span><span class="op">(</span><span class="va">theo_empirical</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/sampling_summary.html">sampling_summary</a></span><span class="op">(</span><span class="va">theo_private</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   endpoint occasion sampling_probability observations_if_sampled</span></span>
 <span><span class="co">#&gt; 1       cp        1            1.0000000                10.16667</span></span>
 <span><span class="co">#&gt; 2       cp        2            0.8333333                 1.00000</span></span>
@@ -1223,7 +1223,7 @@ budget.</p>
 uses the guarded public-fixture backend, which is <strong>noiseless and
 makes no DP claim</strong> — exactly as the demo script does. A
 confidential fit uses the default OpenDP backend and fails closed when
-it is unavailable. The <code><a href="../reference/fit_calibrated_pmx.html">fit_calibrated_pmx()</a></code> mode, which
+it is unavailable. The <code><a href="../reference/synpmx_calibrated.html">synpmx_calibrated()</a></code> mode, which
 asserts curve shape from a public structural model and privately
 calibrates only the magnitude, is the better choice at this cohort size;
 the introduction vignette runs it on this same dataset.</p>

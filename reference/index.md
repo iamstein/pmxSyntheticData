@@ -3,20 +3,20 @@
 ## Generating data
 
 The four generation modes.
-[`synthesize_pmx()`](https://iamstein.github.io/synpmx/reference/synthesize_pmx.md)
+[`synpmx_avatar()`](https://iamstein.github.io/synpmx/reference/synpmx_avatar.md)
 is the default AVATAR path; the others require a public structural
 model.
 
-- [`synthesize_pmx()`](https://iamstein.github.io/synpmx/reference/synthesize_pmx.md)
+- [`synpmx_avatar()`](https://iamstein.github.io/synpmx/reference/synpmx_avatar.md)
   : Synthesize a structurally faithful PMX dataset (AVATAR-style)
-- [`pmx_generate()`](https://iamstein.github.io/synpmx/reference/pmx_generate.md)
-  : Generate a synthetic PMX event table from a structural model
-- [`fit_calibrated_pmx()`](https://iamstein.github.io/synpmx/reference/fit_calibrated_pmx.md)
-  : Calibrate a public structural model to confidential data
-- [`fit_private_pmx()`](https://iamstein.github.io/synpmx/reference/fit_private_pmx.md)
-  : Fit a subject-level differentially private PMX population generator
-- [`generate_pmx()`](https://iamstein.github.io/synpmx/reference/generate_pmx.md)
-  : Generate a new PMX event dataset from a fitted private model
+- [`synpmx_prior()`](https://iamstein.github.io/synpmx/reference/synpmx_prior.md)
+  : Generate a dataset from public inputs only
+- [`synpmx_calibrated()`](https://iamstein.github.io/synpmx/reference/synpmx_calibrated.md)
+  : Generate a dataset from a privately calibrated structural model
+- [`synpmx_empirical()`](https://iamstein.github.io/synpmx/reference/synpmx_empirical.md)
+  : Generate a dataset from a dense differentially private release
+- [`synpmx_generate()`](https://iamstein.github.io/synpmx/reference/synpmx_generate.md)
+  : Draw another dataset from a release already paid for
 
 ## Declaring the data
 
@@ -38,7 +38,7 @@ Roles, endpoints, schema, and bounds that describe an event table.
   :
 
   Roles for tables produced by
-  [`pmx_generate()`](https://iamstein.github.io/synpmx/reference/pmx_generate.md)
+  [`.generate_structural()`](https://iamstein.github.io/synpmx/reference/dot-generate_structural.md)
 
 ## Public model and design inputs
 

@@ -1,7 +1,7 @@
-# Roles for tables produced by [`pmx_generate()`](https://iamstein.github.io/synpmx/reference/pmx_generate.md)
+# Roles for tables produced by [`.generate_structural()`](https://iamstein.github.io/synpmx/reference/dot-generate_structural.md)
 
 Roles for tables produced by
-[`pmx_generate()`](https://iamstein.github.io/synpmx/reference/pmx_generate.md)
+[`.generate_structural()`](https://iamstein.github.io/synpmx/reference/dot-generate_structural.md)
 
 ## Usage
 

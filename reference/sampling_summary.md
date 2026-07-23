@@ -17,7 +17,7 @@ sampling_summary(private_model)
 - private_model:
 
   A model returned by
-  [`fit_private_pmx()`](https://iamstein.github.io/synpmx/reference/fit_private_pmx.md).
+  [`.fit_private()`](https://iamstein.github.io/synpmx/reference/dot-fit_private.md).
 
 ## Value
 

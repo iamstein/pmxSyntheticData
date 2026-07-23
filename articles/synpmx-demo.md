@@ -192,18 +192,18 @@ The package offers four generation modes, and the “Introduction to
 synpmx” vignette applies all four to one dataset side by side:
 
 - **AVATAR blending**
-  ([`synthesize_pmx()`](https://iamstein.github.io/synpmx/reference/synthesize_pmx.md))
+  ([`synpmx_avatar()`](https://iamstein.github.io/synpmx/reference/synpmx_avatar.md))
   — build each synthetic subject from real subjects. No elicitation, no
   formal privacy guarantee.
 - **Prior only**
-  ([`pmx_generate()`](https://iamstein.github.io/synpmx/reference/pmx_generate.md)
+  ([`synpmx_prior()`](https://iamstein.github.io/synpmx/reference/synpmx_prior.md)
   on a public structural model) — read no data at all.
 - **Calibration**
-  ([`fit_calibrated_pmx()`](https://iamstein.github.io/synpmx/reference/fit_calibrated_pmx.md))
+  ([`synpmx_calibrated()`](https://iamstein.github.io/synpmx/reference/synpmx_calibrated.md))
   — simulate from a public structural model whose magnitude is corrected
   by a small differentially private release.
 - **Empirical**
-  ([`fit_private_pmx()`](https://iamstein.github.io/synpmx/reference/fit_private_pmx.md))
+  ([`synpmx_empirical()`](https://iamstein.github.io/synpmx/reference/synpmx_empirical.md))
   — release a dense set of differentially private summaries and rebuild
   subjects from them.
 
@@ -234,7 +234,7 @@ Every example follows the same three steps:
 1.  declare column meanings with
     [`pmx_roles()`](https://iamstein.github.io/synpmx/reference/pmx_roles.md);
 2.  synthesize with
-    [`synthesize_pmx()`](https://iamstein.github.io/synpmx/reference/synthesize_pmx.md);
+    [`synpmx_avatar()`](https://iamstein.github.io/synpmx/reference/synpmx_avatar.md);
 3.  validate structure with
     [`validate_pmx()`](https://iamstein.github.io/synpmx/reference/validate_pmx.md)
     and compare to the source.
@@ -255,7 +255,7 @@ theo_roles <- pmx_roles(
   id = "ID", time = "TIME", dv = "DV", amt = "AMT",
   evid = "EVID", cmt = "CMT", covariates = "WT"
 )
-theo_synth <- synthesize_pmx(theo_md, theo_roles, seed = 303)
+theo_synth <- synpmx_avatar(theo_md, theo_roles, seed = 303)
 #> Warning: Synthetic generation used documented small-group/profile fallbacks:
 #> - `k` was reduced to 1 in at least one compatible event-pattern group.
 #> - A compatible event-pattern group supplied fewer than two non-anchor donors.
@@ -368,7 +368,7 @@ warfarin_roles <- pmx_roles(
   id = "id", time = "time", dv = "dv", amt = "amt", evid = "evid",
   dvid = "dvid", covariates = c("wt", "age", "sex")
 )
-warfarin_synth <- synthesize_pmx(warfarin, warfarin_roles, seed = 404)
+warfarin_synth <- synpmx_avatar(warfarin, warfarin_roles, seed = 404)
 #> Warning: Synthetic generation used documented small-group/profile fallbacks:
 #> - A compatible event-pattern group contained only its anchor; the anchor was used as the sole measurement donor and randomized noise supplied the only trajectory perturbation.
 #> - `k` was reduced to 1 in at least one compatible event-pattern group.
@@ -449,7 +449,7 @@ ggplot2::ggplot(
 white-blood-cell response with a delayed decline, nadir, and recovery.
 Some source dosing schedules are unique; when a compatible event-pattern
 group contains only its anchor,
-[`synthesize_pmx()`](https://iamstein.github.io/synpmx/reference/synthesize_pmx.md)
+[`synpmx_avatar()`](https://iamstein.github.io/synpmx/reference/synpmx_avatar.md)
 uses that anchor as the sole donor and randomized noise supplies the
 perturbation, which it reports through a warning.
 
@@ -459,7 +459,7 @@ data("wbcSim", package = "nlmixr2data")
 wbc_roles <- pmx_roles(
   id = "ID", time = "TIME", dv = "DV", amt = "AMT", evid = "EVID", cmt = "CMT"
 )
-wbc_synth <- suppressWarnings(synthesize_pmx(wbcSim, wbc_roles, seed = 505))
+wbc_synth <- suppressWarnings(synpmx_avatar(wbcSim, wbc_roles, seed = 505))
 validate_pmx(wbc_synth, wbc_roles)$valid
 #> [1] TRUE
 knitr::kable(
@@ -515,7 +515,7 @@ nimo_roles <- pmx_roles(
   covariates = c("BSA", "AGE", "HGT"), subject_properties = "DOS",
   exclude = "WGT"
 )
-nimo_synth <- suppressWarnings(synthesize_pmx(nimoData, nimo_roles, seed = 606))
+nimo_synth <- suppressWarnings(synpmx_avatar(nimoData, nimo_roles, seed = 606))
 validate_pmx(nimo_synth, nimo_roles)$valid
 #> [1] TRUE
 knitr::kable(
@@ -572,7 +572,7 @@ mavo_roles <- pmx_roles(
   cmt = "CMT", rate = "RATE", mdv = "MDV", occasion = "OCC",
   assigned_dose = "DOSE", covariates = c("AGE", "SEX", "WT", "HT")
 )
-mavo_synth <- suppressWarnings(synthesize_pmx(mavoglurant, mavo_roles,
+mavo_synth <- suppressWarnings(synpmx_avatar(mavoglurant, mavo_roles,
                                               seed = 707))
 validate_pmx(mavo_synth, mavo_roles)$valid
 #> [1] TRUE
@@ -636,7 +636,7 @@ share is an explicit public input:
 
 ``` r
 
-theo_empirical <- fit_private_pmx(
+theo_private <- synpmx_empirical(
   data = theo_md, roles = theo_roles,
   endpoints = list(cp = pmx_endpoint(
     alignment = "dose_relative", transform = "log", shape = "occasion", cmt = 2
@@ -654,12 +654,12 @@ theo_empirical <- fit_private_pmx(
     subject_count = 0.10, event = 0.15, timing = 0.15,
     covariates = 0.10, endpoints = 0.50, censoring = 0
   ),
+  seed = 707,
   backend = "public", public_source = TRUE   # theo_md is public; no DP claim
 )
-theo_private <- generate_pmx(theo_empirical, seed = 707)
 validate_pmx(theo_private, theo_roles)$valid
 #> [1] TRUE
-sampling_summary(theo_empirical)
+sampling_summary(theo_private)
 #>   endpoint occasion sampling_probability observations_if_sampled
 #> 1       cp        1            1.0000000                10.16667
 #> 2       cp        2            0.8333333                 1.00000
@@ -711,7 +711,7 @@ Because `theo_md` is already public, this demonstration uses the guarded
 public-fixture backend, which is **noiseless and makes no DP claim** —
 exactly as the demo script does. A confidential fit uses the default
 OpenDP backend and fails closed when it is unavailable. The
-[`fit_calibrated_pmx()`](https://iamstein.github.io/synpmx/reference/fit_calibrated_pmx.md)
+[`synpmx_calibrated()`](https://iamstein.github.io/synpmx/reference/synpmx_calibrated.md)
 mode, which asserts curve shape from a public structural model and
 privately calibrates only the magnitude, is the better choice at this
 cohort size; the introduction vignette runs it on this same dataset.

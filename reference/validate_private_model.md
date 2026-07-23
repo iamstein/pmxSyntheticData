@@ -16,7 +16,7 @@ validate_private_model(private_model, strict = FALSE)
 - private_model:
 
   An object returned by
-  [`fit_private_pmx()`](https://iamstein.github.io/synpmx/reference/fit_private_pmx.md).
+  [`.fit_private()`](https://iamstein.github.io/synpmx/reference/dot-fit_private.md).
 
 - strict:
 

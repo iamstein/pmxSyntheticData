@@ -98,7 +98,7 @@ epsilon.</p>
 <div class="section level3">
 <h3 id="avatar-blending-synthetic-data-built-out-of-real-subjects">AVATAR blending: synthetic data built out of real subjects<a class="anchor" aria-label="anchor" href="#avatar-blending-synthetic-data-built-out-of-real-subjects"></a>
 </h3>
-<p>The <strong>default</strong> method is <code><a href="../reference/synthesize_pmx.html">synthesize_pmx()</a></code>,
+<p>The <strong>default</strong> method is <code><a href="../reference/synpmx_avatar.html">synpmx_avatar()</a></code>,
 AVATAR-style blending. “AVATAR” is a method name rather than an
 initialism: it comes from the patient-centric <em>avatarization</em>
 literature, in which each synthetic record (“avatar”) is constructed
@@ -136,8 +136,8 @@ privacy accounting at all.</p>
 change<a class="anchor" aria-label="anchor" href="#differential-privacy-a-bound-on-what-any-one-subject-can-change"></a>
 </h3>
 <p>The <strong>alternative</strong> is the differentially private (DP)
-engines, <code><a href="../reference/fit_calibrated_pmx.html">fit_calibrated_pmx()</a></code> and
-<code><a href="../reference/fit_private_pmx.html">fit_private_pmx()</a></code>. These never copy or blend a subject’s
+engines, <code><a href="../reference/synpmx_calibrated.html">synpmx_calibrated()</a></code> and
+<code><a href="../reference/synpmx_empirical.html">synpmx_empirical()</a></code>. These never copy or blend a subject’s
 data into the output. Instead they:</p>
 <ol style="list-style-type: decimal">
 <li>compute a small number of <strong>aggregate</strong> statistics from
@@ -271,7 +271,7 @@ undergone no attack-based privacy validation.</p>
 <li>
 <strong>Stays inside</strong> the safe environment — you are the
 only consumer, governance and access controls apply → use
-<strong>AVATAR</strong> (<code><a href="../reference/synthesize_pmx.html">synthesize_pmx()</a></code>). Its lack of a
+<strong>AVATAR</strong> (<code><a href="../reference/synpmx_avatar.html">synpmx_avatar()</a></code>). Its lack of a
 formal guarantee costs nothing, because there is no adversary to
 guarantee against.</li>
 <li>
@@ -292,14 +292,14 @@ by one complete subject produce nearly indistinguishable output, so no
 one person’s participation can be inferred from the release.</p>
 <ul>
 <li>
-<strong><code><a href="../reference/fit_calibrated_pmx.html">fit_calibrated_pmx()</a></code></strong> (structural
+<strong><code><a href="../reference/synpmx_calibrated.html">synpmx_calibrated()</a></code></strong> (structural
 correction). Asserts curve shape from a public structural model and
 privately calibrates only the exposure magnitude by a small correction
 factor. Because it releases very few quantities, it remains viable at
 small cohorts. This is the recommended DP path for early-phase
 studies.</li>
 <li>
-<strong><code><a href="../reference/fit_private_pmx.html">fit_private_pmx()</a></code></strong> (dense grid).
+<strong><code><a href="../reference/synpmx_empirical.html">synpmx_empirical()</a></code></strong> (dense grid).
 Releases a larger set of noised population summaries. Retained for large
 pooled corpora where its cost is affordable.</li>
 </ul>
@@ -336,15 +336,15 @@ Ranges chosen by looking at the data break it silently.</li>
 </h2>
 <p>Everything below applies to the <strong>differentially
 private</strong> modes only. If your synthetic data stays inside a
-trusted environment, use <code><a href="../reference/synthesize_pmx.html">synthesize_pmx()</a></code> and ignore
-epsilon entirely.</p>
+trusted environment, use <code><a href="../reference/synpmx_avatar.html">synpmx_avatar()</a></code> and ignore epsilon
+entirely.</p>
 <p>Epsilon is the one-person influence limit: smaller means stronger
 privacy and more noise, larger means weaker privacy and less noise.
 There is no universal default; an approved value must come from
 governance and threat modeling, not from whichever number makes a plot
 look best.</p>
 <p>For the structural-correction engine
-(<code><a href="../reference/fit_calibrated_pmx.html">fit_calibrated_pmx()</a></code>), the usable accuracy is captured by
+(<code><a href="../reference/synpmx_calibrated.html">synpmx_calibrated()</a></code>), the usable accuracy is captured by
 one quantity:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mspace width="0.278em"></mspace><mo>=</mo><mspace width="0.278em"></mspace><mfrac><mi>d</mi><mrow><mi>ε</mi><mi>N</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">f \;=\; \frac{d}{\varepsilon N}</annotation></semantics></math></p>
 <p>where <code>d</code> is the number of released quantities,

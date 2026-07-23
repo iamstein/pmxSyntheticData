@@ -31,7 +31,7 @@ pretending to provide privacy.
 
 ## Confidential-data access inventory
 
-[`fit_private_pmx()`](https://iamstein.github.io/synpmx/reference/fit_private_pmx.md)
+[`synpmx_empirical()`](https://iamstein.github.io/synpmx/reference/synpmx_empirical.md)
 is the only exported synthesis function that accepts source data. Inside
 the fit, source data are accessed for the following bounded
 representations:
@@ -51,7 +51,7 @@ They must not be exposed as public diagnostics or logs. They either
 validate public assertions or stop the restricted process; they are not
 serialized into the fitted model.
 
-[`generate_pmx()`](https://iamstein.github.io/synpmx/reference/generate_pmx.md),
+[`synpmx_generate()`](https://iamstein.github.io/synpmx/reference/synpmx_generate.md),
 [`validate_private_model()`](https://iamstein.github.io/synpmx/reference/validate_private_model.md),
 [`privacy_report()`](https://iamstein.github.io/synpmx/reference/privacy_report.md),
 and generated- data validation do not accept or consult source data.
@@ -143,7 +143,7 @@ sensitivity, and dimension. Finalization stops if composition exceeds
 the request. Every fit creates one release-ledger entry. Refitting the
 same source is a new release whose budget must be composed with all
 previous releases by organizational governance. Repeated
-[`generate_pmx()`](https://iamstein.github.io/synpmx/reference/generate_pmx.md)
+[`synpmx_generate()`](https://iamstein.github.io/synpmx/reference/synpmx_generate.md)
 calls from one fitted model consume no additional budget.
 
 ## Serialization audit boundary
