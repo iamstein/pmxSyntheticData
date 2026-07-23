@@ -91,7 +91,19 @@ PRIORS <- pmx_priors(
 #   pd = pmx_prior(c(1 / 4, 4), "baseline literature")   # baseline priors are tight
 # )
 
-# --- 4. Column roles: map YOUR columns onto PMX roles -----------------------
+# --- 4. Covariate columns (optional) ----------------------------------------
+# Baseline covariates to carry into the output so covariate-handling pipeline
+# code has columns to run against. Each one costs one privacy slice: a
+# continuous covariate releases its clipped mean, a categorical one its level
+# proportions. Ranges and levels are public (inclusion criteria / protocol),
+# chosen without looking at the data. Set COVARIATES <- NULL to skip.
+COVARIATES <- pmx_covariates(
+  WT  = pmx_covariate(range = c(40, 120), source = "FILL IN: inclusion criteria"),
+  AGE = pmx_covariate(range = c(18, 75),  source = "FILL IN: inclusion criteria"),
+  SEX = pmx_covariate(levels = c("M", "F"), source = "FILL IN: protocol")
+)
+
+# --- 5. Column roles: map YOUR columns onto PMX roles -----------------------
 # Only the roles the real dataset has. Ignored when DRY_RUN = TRUE.
 ROLES <- pmx_roles(
   id   = "ID",  time = "TIME", dv  = "DV", amt = "AMT", evid = "EVID",
@@ -122,7 +134,8 @@ read_source <- function() {
       "2cmt_oral", c(cl = 22, v = 30, q = 15, v2 = 100, ka = 1),
       source = "dry-run stand-in truth"
     )
-    return(pmx_generate(truth, DESIGN, n_subjects = 40, seed = 1))
+    return(pmx_generate(truth, DESIGN, n_subjects = 40, seed = 1,
+                        covariates = COVARIATES))
   }
   if (!file.exists(DATA_PATH)) {
     stop("DATA_PATH not found: ", normalizePath(DATA_PATH, mustWork = FALSE))
@@ -146,20 +159,23 @@ n_subjects <- length(unique(raw[[roles$id]]))
 # ---- PRIOR version: public inputs only, no data, no budget -----------------
 # Matched to the source cohort size so the two versions are comparable.
 message("\n== PRIOR version (no data, no privacy budget) ==")
-prior_mock <- pmx_generate(MODEL, DESIGN, n_subjects = n_subjects, seed = SEED)
+prior_mock <- pmx_generate(MODEL, DESIGN, n_subjects = n_subjects, seed = SEED,
+                           covariates = COVARIATES)
 stopifnot(validate_pmx(prior_mock, pmx_generated_roles())$valid)
 message("  generated ", nrow(prior_mock), " rows for ",
         length(unique(prior_mock$ID)), " subjects")
 
 # ---- Pre-flight: is the calibrated release worth its budget? ---------------
 message("\n== Pre-flight (no data read, no budget) ==")
-print(pmx_preflight(PRIORS, epsilon = EPSILON, n_subjects = n_subjects))
+print(pmx_preflight(PRIORS, epsilon = EPSILON, n_subjects = n_subjects,
+                    covariates = COVARIATES))
 
 # ---- CALIBRATED version: the only budget-spending step ---------------------
 message("\n== CALIBRATED version ==")
 fit <- fit_calibrated_pmx(
   raw, roles, MODEL, DESIGN, PRIORS,
   epsilon       = EPSILON,
+  covariates    = COVARIATES,
   backend       = if (DRY_RUN) "public" else "opendp",
   public_source = DRY_RUN          # NEVER TRUE for confidential data
 )
