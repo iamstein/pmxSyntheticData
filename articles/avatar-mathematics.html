@@ -403,31 +403,45 @@ useful separation.</p>
 <h2 id="below-the-limit-of-quantification-bloq-data-and-a-monolix-style-cens-column">Below-the-limit-of-quantification (BLOQ) data and a Monolix-style
 CENS column<a class="anchor" aria-label="anchor" href="#below-the-limit-of-quantification-bloq-data-and-a-monolix-style-cens-column"></a>
 </h2>
-<p>AVATAR does not synthesize a censoring process. A declared
-<code>cens</code>/<code>limit</code> role is accepted for schema
-validation, but at present:</p>
-<ul>
-<li>
-<code>CENS</code> is copied from the anchor template as an
-unassigned column;</li>
-<li>a numeric DV on a row with <code>CENS = 1</code> is treated as an
-ordinary observed number if EVID and MDV make that row eligible;</li>
-<li>no likelihood-based censoring, interval,
-lower-limit-of-quantification (LLOQ), substitution, or imputation rule
-is applied; and</li>
-<li>after DV synthesis, a copied <code>CENS</code> flag may no longer
-agree with the new DV.</li>
-</ul>
-<p>Declaring <code>CENS</code> as a baseline covariate is not a
-workaround: if it changes within subject, strict validation correctly
-rejects it as nonconstant.</p>
-<p>For now, a dataset with BLOQ records should be preprocessed under an
-explicit, documented analysis convention before calling
-<code><a href="../reference/synpmx_avatar.html">synpmx_avatar()</a></code>. Setting DV missing and using a nonzero
-declared MDV can retain an anchor’s missingness position, but this still
-does not synthesize a coherent censoring process. Users who need
-synthetic CENS/LLOQ semantics should treat that as unsupported package
-behavior, not as an implicit feature.</p>
+<p>Declare <code>cens</code> and, if the source uses one,
+<code>limit</code> in <code><a href="../reference/pmx_roles.html">pmx_roles()</a></code>, and AVATAR reconstructs
+censoring rather than copying it. The mechanism has three parts.</p>
+<p><strong>The boundary is read from the source.</strong> AVATAR makes
+no formal privacy claim, so it may recover the assay limit from the data
+itself: under the Monolix convention a censored row reports the boundary
+in <code>DV</code>, with <code>LIMIT</code> carrying the other end of an
+interval when there is one. Left, right, and interval censoring are each
+recognised. A differentially private engine may <em>not</em> do this —
+there the limit must be a declared public input, because a boundary
+inferred from confidential records is itself a release. That asymmetry
+is the reason the two engines derive boundaries differently.</p>
+<p>If a study used more than one assay limit, the most conservative
+boundary is taken rather than inventing a per-row rule the source cannot
+support.</p>
+<p><strong>Censored donor values are imputed before blending.</strong>
+Every censored source row reports the same substituted number, so
+blending those values directly would put a floor under the synthetic
+data that the real study does not have. Each censored row is instead
+replaced by a draw inside its censoring region — uniform below the limit
+for a left-censored row, uniform within the interval for an
+interval-censored one — before the trajectory is transformed and
+blended. A uniform draw rather than a fixed LLOQ/2 avoids replacing one
+artificial spike with another.</p>
+<p><strong><code>DV</code>, <code>CENS</code>, and <code>LIMIT</code>
+are reconstructed together.</strong> The back-transformed blend is
+treated as a <em>latent</em> value: what the subject would have measured
+with no assay limit. The boundary is then applied to that latent, and
+all three columns are written from the result, so they cannot disagree.
+A generated value below the limit produces <code>CENS = 1</code> with
+<code>DV</code> exactly at the limit, reproducing the spike of identical
+values that characterises real censored data.</p>
+<p>Two honest limitations. The censored <em>fraction</em> is reproduced
+approximately, not exactly: blending shrinks variance toward the middle
+while the imputation draws uniformly across the censoring region, so the
+synthetic rate typically runs somewhat above the source’s. And if a
+<code>cens</code> role is declared but no boundary can be read from it —
+rows flagged with <code>DV</code> missing, for instance — AVATAR warns
+and carries the flag through untouched rather than guessing.</p>
 </div>
 <div class="section level2">
 <h2 id="step-6-restrict-neighbors-to-compatible-event-patterns">Step 6: restrict neighbors to compatible event patterns<a class="anchor" aria-label="anchor" href="#step-6-restrict-neighbors-to-compatible-event-patterns"></a>

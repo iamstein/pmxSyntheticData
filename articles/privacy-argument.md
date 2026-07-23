@@ -144,7 +144,7 @@ the request. Every fit creates one release-ledger entry. Refitting the
 same source is a new release whose budget must be composed with all
 previous releases by organizational governance. Repeated
 [`synpmx_generate()`](https://iamstein.github.io/synpmx/reference/synpmx_generate.md)
-calls from one fitted model consume no additional budget.
+calls against one release consume no additional budget.
 
 ## Serialization audit boundary
 

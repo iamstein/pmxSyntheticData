@@ -181,18 +181,41 @@ the compound class, or the reasoning that set the starting dose.</p>
 <span>  typical <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>cl <span class="op">=</span> <span class="fl">6</span>, v <span class="op">=</span> <span class="fl">35</span>, ka <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span>,          <span class="co"># deliberately imperfect</span></span>
 <span>  source <span class="op">=</span> <span class="st">"illustrative allometric scaling; never fitted to theo_md"</span></span>
 <span><span class="op">)</span></span>
+<span><span class="co"># theo_md samples richly on the first and last days and takes a single trough</span></span>
+<span><span class="co"># in between, which is the usual shape for a repeated-dose study. `sampling`</span></span>
+<span><span class="co"># takes one entry per dose so that can be said directly; a bare vector would</span></span>
+<span><span class="co"># apply the rich profile after all seven doses and oversample the study</span></span>
+<span><span class="co"># three-fold.</span></span>
+<span><span class="va">rich</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">4</span>, <span class="fl">7</span>, <span class="fl">9</span>, <span class="fl">12</span>, <span class="fl">24</span><span class="op">)</span></span>
 <span><span class="va">theo_design</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pmx_trial_design.html">pmx_trial_design</a></span><span class="op">(</span></span>
 <span>  dose_levels <span class="op">=</span> <span class="fl">320</span>, cohort_sizes <span class="op">=</span> <span class="fl">12</span>,</span>
-<span>  sampling <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">4</span>, <span class="fl">7</span>, <span class="fl">9</span>, <span class="fl">12</span>, <span class="fl">24</span><span class="op">)</span>,</span>
+<span>  sampling <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">rich</span>, <span class="fl">0</span>, <span class="cn">NULL</span>, <span class="cn">NULL</span>, <span class="cn">NULL</span>, <span class="cn">NULL</span>, <span class="va">rich</span><span class="op">)</span>,</span>
 <span>  n_doses <span class="op">=</span> <span class="fl">7</span>, dose_interval <span class="op">=</span> <span class="fl">24</span>,</span>
 <span>  source <span class="op">=</span> <span class="st">"illustrative protocol"</span></span>
 <span><span class="op">)</span></span>
+<span><span class="va">theo_design</span></span>
+<span><span class="co">#&gt; Public trial design</span></span>
+<span><span class="co">#&gt;   doses: 320  (n = 12)</span></span>
+<span><span class="co">#&gt;   dose times: 0, 24, 48, 72, 96, 120, 144</span></span>
+<span><span class="co">#&gt;   sampling: </span></span>
+<span><span class="co">#&gt;     dose 1: 0, 0.25, 0.5, 1, 2, 4, 7, 9, 12, 24</span></span>
+<span><span class="co">#&gt;     dose 2: 0</span></span>
+<span><span class="co">#&gt;     dose 3: none</span></span>
+<span><span class="co">#&gt;     dose 4: none</span></span>
+<span><span class="co">#&gt;     dose 5: none</span></span>
+<span><span class="co">#&gt;     dose 6: none</span></span>
+<span><span class="co">#&gt;     dose 7: 0, 0.25, 0.5, 1, 2, 4, 7, 9, 12, 24</span></span>
+<span><span class="co">#&gt;   source: illustrative protocol</span></span>
 <span><span class="va">prior_only</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synpmx_prior.html">synpmx_prior</a></span><span class="op">(</span><span class="va">theo_model</span>, <span class="va">theo_design</span>, n_subjects <span class="op">=</span> <span class="fl">12</span>, seed <span class="op">=</span> <span class="fl">202</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">prior_only</span>, <span class="fl">3</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   ID      TIME NTIME       TAD OCC      DV AMT RATE EVID CMT DVID MDV CENS DOSE</span></span>
-<span><span class="co">#&gt; 1  1 0.0000000  0.00 0.0000000   1      NA 320    0    1   1 &lt;NA&gt;   1    0  320</span></span>
-<span><span class="co">#&gt; 2  1 0.0000000  0.00 0.0000000   1 0.00000   0    0    0   2   cp   0    0  320</span></span>
-<span><span class="co">#&gt; 3  1 0.2447759  0.25 0.2447759   1 3.28301   0    0    0   2   cp   0    0  320</span></span></code></pre></div>
+<span><span class="co">#&gt;   ID      TIME NTIME       TAD OCC       DV AMT RATE EVID CMT DVID MDV CENS</span></span>
+<span><span class="co">#&gt; 1  1 0.0000000  0.00 0.0000000   1       NA 320    0    1   1 &lt;NA&gt;   1    0</span></span>
+<span><span class="co">#&gt; 2  1 0.0000000  0.00 0.0000000   1 0.000000   0    0    0   2   cp   0    0</span></span>
+<span><span class="co">#&gt; 3  1 0.2447759  0.25 0.2447759   1 3.462932   0    0    0   2   cp   0    0</span></span>
+<span><span class="co">#&gt;   DOSE</span></span>
+<span><span class="co">#&gt; 1  320</span></span>
+<span><span class="co">#&gt; 2  320</span></span>
+<span><span class="co">#&gt; 3  320</span></span></code></pre></div>
 <p>The generated table uses the package’s own generated schema
 (<code><a href="../reference/pmx_generated_roles.html">pmx_generated_roles()</a></code>), including nominal time, time after
 dose, and occasion columns. The clearance of 6 L/h assumed above is
@@ -362,17 +385,17 @@ corpora, not on twelve subjects.</p>
 </tr>
 <tr class="even">
 <td align="left">2. Prior only</td>
-<td align="right">768</td>
-<td align="right">3.63</td>
-<td align="right">0.54</td>
-<td align="right">7.00</td>
+<td align="right">240</td>
+<td align="right">3.16</td>
+<td align="right">0.28</td>
+<td align="right">6.43</td>
 </tr>
 <tr class="odd">
 <td align="left">3. Calibration</td>
-<td align="right">768</td>
-<td align="right">4.49</td>
-<td align="right">1.15</td>
-<td align="right">7.96</td>
+<td align="right">240</td>
+<td align="right">4.05</td>
+<td align="right">0.36</td>
+<td align="right">7.54</td>
 </tr>
 <tr class="even">
 <td align="left">4. Empirical</td>
@@ -627,9 +650,11 @@ within synthetic subject and retain classes.</label></li>
 and endpoint transformations were reviewed.</label></li>
 <li><label><input type="checkbox">Any TAD column was recomputed if
 TIME was jittered.</label></li>
-<li><label><input type="checkbox">BLOQ/CENS data were handled by an
-explicit external convention; no censoring support was
-assumed.</label></li>
+<li><label><input type="checkbox">If the source has
+below-the-limit-of-quantification (BLOQ) records, a <code>cens</code>
+role was declared so the limit is reconstructed rather than copied, and
+the generated censored fraction was checked against the
+source.</label></li>
 <li><label><input type="checkbox">No claim of anonymity, privacy,
 parameter fidelity, or scientific equivalence is being
 made.</label></li>

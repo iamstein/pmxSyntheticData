@@ -35,7 +35,14 @@ pmx_trial_design(
 
 - sampling:
 
-  Nominal sampling times after each dose, from the protocol.
+  Nominal sampling times after a dose, from the protocol, measured from
+  that dose. A single numeric vector applies the same schedule after
+  every dose. Real protocols often do not: to sample richly after some
+  doses and sparsely or not at all after others, supply a **list with
+  one element per dose**, using `NULL` for a dose with no samples. A
+  seven-dose study with full profiles on the first and last days and a
+  single trough in between is
+  `sampling = list(rich, 0, NULL, NULL, NULL, 0, rich)`.
 
 - n_doses:
 

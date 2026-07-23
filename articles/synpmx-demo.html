@@ -1195,10 +1195,16 @@ budget share is an explicit public input:</p>
 <span><span class="co">#&gt; 5             0.0000000 privacy_accounted_inference</span></span>
 <span><span class="co">#&gt; 6             0.0000000 privacy_accounted_inference</span></span>
 <span><span class="co">#&gt; 7            11.0000000 privacy_accounted_inference</span></span></code></pre></div>
-<p>The fit reads the data once; generation is post-processing, so any
-number of datasets can be drawn from one release without spending more
-budget.</p>
+<p>The confidential data is read once, at the moment
+<code><a href="../reference/synpmx_empirical.html">synpmx_empirical()</a></code> is called. The release it produced
+travels with the returned dataset, so any number of further datasets can
+be drawn from it as post-processing, without spending more budget:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">theo_private_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synpmx_generate.html">synpmx_generate</a></span><span class="op">(</span><span class="va">theo_private</span>, seed <span class="op">=</span> <span class="fl">708</span><span class="op">)</span>   <span class="co"># spends nothing</span></span></code></pre></div>
+<p>Reach for <code><a href="../reference/synpmx_generate.html">synpmx_generate()</a></code> rather than calling
+<code><a href="../reference/synpmx_empirical.html">synpmx_empirical()</a></code> a second time — a second call is a
+second release, and its budget has to be composed with the first.</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">theo_private_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span>
 <span>  <span class="fu">observed_plot_data</span><span class="op">(</span><span class="va">theo_md</span>, <span class="va">theo_roles</span>, <span class="st">"Source"</span><span class="op">)</span>,</span>
 <span>  <span class="fu">observed_plot_data</span><span class="op">(</span><span class="va">theo_private</span>, <span class="va">theo_roles</span>, <span class="st">"Synthetic"</span><span class="op">)</span></span>

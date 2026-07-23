@@ -678,9 +678,23 @@ sampling_summary(theo_private)
 #> 7            11.0000000 privacy_accounted_inference
 ```
 
-The fit reads the data once; generation is post-processing, so any
-number of datasets can be drawn from one release without spending more
-budget.
+The confidential data is read once, at the moment
+[`synpmx_empirical()`](https://iamstein.github.io/synpmx/reference/synpmx_empirical.md)
+is called. The release it produced travels with the returned dataset, so
+any number of further datasets can be drawn from it as post-processing,
+without spending more budget:
+
+``` r
+
+theo_private_2 <- synpmx_generate(theo_private, seed = 708)   # spends nothing
+```
+
+Reach for
+[`synpmx_generate()`](https://iamstein.github.io/synpmx/reference/synpmx_generate.md)
+rather than calling
+[`synpmx_empirical()`](https://iamstein.github.io/synpmx/reference/synpmx_empirical.md)
+a second time — a second call is a second release, and its budget has to
+be composed with the first.
 
 ``` r
 

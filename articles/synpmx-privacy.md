@@ -189,6 +189,32 @@ dp_backend_status()
 #> 1  OpenDP      TRUE  0.15.1       TRUE
 ```
 
+### Budget is spent once, per call
+
+Both functions read the confidential data exactly once and return a
+synthetic dataset with the resulting release attached to it. Generating
+from that release again is post-processing: it reads nothing and costs
+nothing.
+
+``` r
+
+syn  <- synpmx_calibrated(data, roles, model, design, priors, epsilon = 1)
+syn2 <- synpmx_generate(syn, seed = 202)   # free
+privacy_report(syn)                        # the realized accounting
+```
+
+The distinction matters because calling
+[`synpmx_calibrated()`](https://iamstein.github.io/synpmx/reference/synpmx_calibrated.md)
+or
+[`synpmx_empirical()`](https://iamstein.github.io/synpmx/reference/synpmx_empirical.md)
+a second time is a **second release**, whose budget must be composed
+with the first — two calls at `epsilon = 1` spend 2 in total, not 1. Use
+[`synpmx_generate()`](https://iamstein.github.io/synpmx/reference/synpmx_generate.md)
+for further datasets, or ask for several at once with `n_datasets`. A
+repeated fit against the same data warns with the running total, but the
+accounting is a governance obligation, not something the package can
+enforce for you.
+
 ## What the guarantee does and does not mean
 
 - **Epsilon** is the one-person influence limit: smaller is stronger. It

@@ -110,18 +110,41 @@ theo_model <- pmx_structural_model(
   typical = c(cl = 6, v = 35, ka = 1.5),          # deliberately imperfect
   source = "illustrative allometric scaling; never fitted to theo_md"
 )
+# theo_md samples richly on the first and last days and takes a single trough
+# in between, which is the usual shape for a repeated-dose study. `sampling`
+# takes one entry per dose so that can be said directly; a bare vector would
+# apply the rich profile after all seven doses and oversample the study
+# three-fold.
+rich <- c(0, 0.25, 0.5, 1, 2, 4, 7, 9, 12, 24)
 theo_design <- pmx_trial_design(
   dose_levels = 320, cohort_sizes = 12,
-  sampling = c(0, 0.25, 0.5, 1, 2, 4, 7, 9, 12, 24),
+  sampling = list(rich, 0, NULL, NULL, NULL, NULL, rich),
   n_doses = 7, dose_interval = 24,
   source = "illustrative protocol"
 )
+theo_design
+#> Public trial design
+#>   doses: 320  (n = 12)
+#>   dose times: 0, 24, 48, 72, 96, 120, 144
+#>   sampling: 
+#>     dose 1: 0, 0.25, 0.5, 1, 2, 4, 7, 9, 12, 24
+#>     dose 2: 0
+#>     dose 3: none
+#>     dose 4: none
+#>     dose 5: none
+#>     dose 6: none
+#>     dose 7: 0, 0.25, 0.5, 1, 2, 4, 7, 9, 12, 24
+#>   source: illustrative protocol
 prior_only <- synpmx_prior(theo_model, theo_design, n_subjects = 12, seed = 202)
 head(prior_only, 3)
-#>   ID      TIME NTIME       TAD OCC      DV AMT RATE EVID CMT DVID MDV CENS DOSE
-#> 1  1 0.0000000  0.00 0.0000000   1      NA 320    0    1   1 <NA>   1    0  320
-#> 2  1 0.0000000  0.00 0.0000000   1 0.00000   0    0    0   2   cp   0    0  320
-#> 3  1 0.2447759  0.25 0.2447759   1 3.28301   0    0    0   2   cp   0    0  320
+#>   ID      TIME NTIME       TAD OCC       DV AMT RATE EVID CMT DVID MDV CENS
+#> 1  1 0.0000000  0.00 0.0000000   1       NA 320    0    1   1 <NA>   1    0
+#> 2  1 0.0000000  0.00 0.0000000   1 0.000000   0    0    0   2   cp   0    0
+#> 3  1 0.2447759  0.25 0.2447759   1 3.462932   0    0    0   2   cp   0    0
+#>   DOSE
+#> 1  320
+#> 2  320
+#> 3  320
 ```
 
 The generated table uses the package’s own generated schema
@@ -308,8 +331,8 @@ knitr::kable(
 |                 | n_observations | median |  p10 |   p90 |
 |:----------------|---------------:|-------:|-----:|------:|
 | 1\. AVATAR      |            264 |   5.74 | 1.38 | 10.65 |
-| 2\. Prior only  |            768 |   3.63 | 0.54 |  7.00 |
-| 3\. Calibration |            768 |   4.49 | 1.15 |  7.96 |
+| 2\. Prior only  |            240 |   3.16 | 0.28 |  6.43 |
+| 3\. Calibration |            240 |   4.05 | 0.36 |  7.54 |
 | 4\. Empirical   |            264 |   4.43 | 0.43 | 11.96 |
 | Source          |            264 |   5.74 | 1.25 |  9.30 |
 
@@ -469,8 +492,10 @@ classes.
 
 Any TAD column was recomputed if TIME was jittered.
 
-BLOQ/CENS data were handled by an explicit external convention; no
-censoring support was assumed.
+If the source has below-the-limit-of-quantification (BLOQ) records, a
+`cens` role was declared so the limit is reconstructed rather than
+copied, and the generated censored fraction was checked against the
+source.
 
 No claim of anonymity, privacy, parameter fidelity, or scientific
 equivalence is being made.
