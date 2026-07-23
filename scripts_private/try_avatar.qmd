@@ -7,8 +7,9 @@ AVATAR blending is the default `synpmx` method. Use it when the synthetic data
 *stays inside* your trusted computing environment (you are the only consumer;
 governance and access controls apply). It resamples and blends whole source
 subject trajectories -- faithful, and far less ceremony than the differentially
-private path -- but makes **no** formal privacy guarantee. If the data may cross
-a trust boundary (e.g. externally shared data), use `try_dp_calibrated.R` instead; see the `synpmx-privacy` vignette for the decision rule.
+private (DP) path -- but makes **no** formal privacy guarantee. If the data may cross
+a trust boundary (e.g. externally shared data), use `try_dp_calibrated.R` instead or explore
+the other algorithms as well (Prior, Empirical); see the `synpmx-privacy` vignette for the decision rule.
 
 Prefer a plain script? `knitr::purl("try_avatar.qmd")` writes the R chunks out
 as a `.R` file. There is one template; the script is generated from it.
@@ -31,14 +32,6 @@ DATA_PATH  <- "data/your_modeling_dataset.csv"
 OUT_DIR    <- "output"
 SEED       <- 1234        # reproducibility seed; the caller's RNG is untouched
 N_SUBJECTS <- NULL        # NULL keeps the source cohort size
-
-# Optional cleanup before synthesis: filter to one study, fix units, recode a
-# column. Receives the raw data frame, returns a cleaned one. Pooling two assays
-# with different limits will trip the censoring check, so filter to one study
-# here if that applies.
-PREP <- function(d) {
-  d
-}
 ```
 
 ## Configuration 2 --- what the columns mean
@@ -102,7 +95,7 @@ if (!report$valid) {
 cat("Source is valid:", length(unique(raw[[roles$id]])), "subjects.\n")
 ```
 
-## Synthesize
+## Synthesize the data
 
 ```{r}
 #| label: synthesize
