@@ -180,8 +180,9 @@ roles <- if (DRY_RUN) pmx_generated_roles() else ROLES
 message("\n== Source structural validation (restricted) ==")
 report <- validate_pmx(raw, roles, strict = FALSE)
 if (!report$valid) {
-  print(report$checks[report$checks$status == "error", c("check", "message")])
-  stop("Source failed structural validation; fix the role mapping first.")
+  print(report)   # names each problem, the role, and the column it maps to
+  stop("Source failed structural validation. See the numbered problems above; ",
+       "each says which role and column to fix in `pmx_roles()`.", call. = FALSE)
 }
 message("  valid; ", length(unique(raw[[roles$id]])), " subjects")
 
