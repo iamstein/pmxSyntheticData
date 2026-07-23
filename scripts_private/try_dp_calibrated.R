@@ -19,7 +19,7 @@
 #   3. set DRY_RUN = FALSE, point DATA_PATH at the real dataset, rerun
 #   4. read the pre-flight verdict, then compare the two versions
 
-library(pmxSynthData)
+library(synpmx)
 # If not installed here: devtools::load_all("/path/to/pmxSyntheticData")
 
 # ============================================================================
