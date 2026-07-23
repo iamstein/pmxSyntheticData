@@ -61,7 +61,8 @@ correct for fixed cohorts.
 
 ## Two scripts, one decision
 
-Pick by the trust boundary (see `design/METHOD_DISCUSSION.md`):
+Pick by the trust boundary (see the `synpmx-privacy` vignette for the decision
+rule):
 
 - **`try_avatar.R`** — the default. AVATAR blending (`synpmx_avatar()`) for data
   that STAYS INSIDE this trusted environment. Simpler, more faithful, no formal

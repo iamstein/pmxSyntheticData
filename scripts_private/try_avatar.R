@@ -5,8 +5,8 @@
 # access controls apply). It resamples and blends whole source subject
 # trajectories -- more faithful and far less ceremony than the differentially
 # private path -- but makes NO formal privacy guarantee. If the data may cross a
-# trust boundary, use try_dp_calibrated.R instead. See README.md and
-# design/METHOD_DISCUSSION.md for the decision rule.
+# trust boundary, use try_dp_calibrated.R instead. See the "synpmx-privacy"
+# vignette for the decision rule (which method when).
 #
 # Runs in the safe computing environment, in a gitignored folder so nothing here
 # can be committed.
@@ -118,7 +118,8 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
                time = as.numeric(d[[roles$time]][keep]),
                dv   = as.numeric(d[[roles$dv]][keep]),
                endpoint = if (is.null(roles$dvid)) "DV" else
-                 as.character(d[[roles$dvid]][keep]))
+                 # dvid may name >1 column; the first is the endpoint key.
+                 as.character(d[[roles$dvid[[1]]]][keep]))
   }
   compare <- rbind(obs(raw, "source"), obs(synthetic, "synthetic"))
   p <- ggplot2::ggplot(compare, ggplot2::aes(time, dv, colour = dataset)) +

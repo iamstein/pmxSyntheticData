@@ -10,8 +10,8 @@ your trusted computing environment (you are the only consumer, governance and
 access controls apply). It resamples and blends whole source subject
 trajectories -- more faithful and far less ceremony than the differentially
 private path -- but makes **no** formal privacy guarantee. If the data may cross
-a trust boundary, use `try_dp_calibrated.R` instead. See `README.md` and
-`design/METHOD_DISCUSSION.md` for the decision rule.
+a trust boundary, use `try_dp_calibrated.R` instead. See the `synpmx-privacy`
+vignette for the decision rule (which method when).
 
 This document runs in the safe computing environment, in a gitignored folder so
 nothing here can be committed.
