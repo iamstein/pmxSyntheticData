@@ -100,12 +100,6 @@ ROLES <- pmx_roles(
 
 # Number of synthetic subjects. NULL keeps the source cohort size.
 N_SUBJECTS <- NULL
-
-# Optional per-dataset cleanup: fix units, drop screening rows, recode. Receives
-# the raw data frame, returns a cleaned one.
-PREP <- function(d) {
-  d
-}
 ```
 
 ## Workflow
