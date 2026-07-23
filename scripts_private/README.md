@@ -13,7 +13,7 @@ patient data and allow-list it explicitly.
 - Put the real dataset in `scripts_private/data/` (ignored).
 - Output lands in `scripts_private/output/` (ignored).
 - Never set `public_source = TRUE` for confidential data.
-- The source-vs-mock comparison is a **restricted** diagnostic. It is derived
+- The source-vs-synthetic comparison is a **restricted** diagnostic. It is derived
   from the real data and must stay in this environment.
 
 ## The three inputs, and their privacy status

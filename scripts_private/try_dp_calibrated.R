@@ -193,7 +193,7 @@ n_subjects <- length(unique(raw[[roles$id]]))
 # be generated here; they are added only to the calibrated version below. DP
 # covariates with a public range/levels work in both.
 message("\n== PRIOR version (no data, no privacy budget) ==")
-prior_mock <- tryCatch(
+prior_synthetic <- tryCatch(
   pmx_generate(MODEL, DESIGN, n_subjects = n_subjects, seed = SEED,
                covariates = COVARIATES),
   error = function(e) {
@@ -201,9 +201,9 @@ prior_mock <- tryCatch(
     pmx_generate(MODEL, DESIGN, n_subjects = n_subjects, seed = SEED)
   }
 )
-stopifnot(validate_pmx(prior_mock, pmx_generated_roles())$valid)
-message("  generated ", nrow(prior_mock), " rows for ",
-        length(unique(prior_mock$ID)), " subjects")
+stopifnot(validate_pmx(prior_synthetic, pmx_generated_roles())$valid)
+message("  generated ", nrow(prior_synthetic), " rows for ",
+        length(unique(prior_synthetic$ID)), " subjects")
 
 # ---- Pre-flight: is the calibrated release worth its budget? ---------------
 message("\n== Pre-flight (no data read, no budget) ==")
@@ -223,14 +223,14 @@ print(fit)
 message("\nProvenance (for the release record):")
 print(fit$provenance)
 
-calibrated_mock <- pmx_generate(fit, seed = SEED)
-stopifnot(validate_pmx(calibrated_mock, pmx_generated_roles())$valid)
+calibrated_synthetic <- pmx_generate(fit, seed = SEED)
+stopifnot(validate_pmx(calibrated_synthetic, pmx_generated_roles())$valid)
 
 # ---- Save outputs (gitignored) ---------------------------------------------
-utils::write.csv(prior_mock,
-                 file.path(OUT_DIR, "mock_prior.csv"), row.names = FALSE)
-utils::write.csv(calibrated_mock,
-                 file.path(OUT_DIR, "mock_calibrated.csv"), row.names = FALSE)
+utils::write.csv(prior_synthetic,
+                 file.path(OUT_DIR, "synthetic_prior.csv"), row.names = FALSE)
+utils::write.csv(calibrated_synthetic,
+                 file.path(OUT_DIR, "synthetic_calibrated.csv"), row.names = FALSE)
 saveRDS(fit, file.path(OUT_DIR, "calibrated_model.rds"))
 
 # ---- RESTRICTED diagnostic: source vs both versions ------------------------
@@ -246,8 +246,8 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
   gr <- pmx_generated_roles()
   compare <- rbind(
     obs(raw, roles, "source"),
-    obs(prior_mock, gr, "prior"),
-    obs(calibrated_mock, gr, "calibrated")
+    obs(prior_synthetic, gr, "prior"),
+    obs(calibrated_synthetic, gr, "calibrated")
   )
   compare$dataset <- factor(compare$dataset,
                             levels = c("source", "prior", "calibrated"))
