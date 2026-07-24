@@ -304,6 +304,42 @@ knitr::kable(
 
 Theophylline cohort and sampling-design checks {.table}
 
+[`compare_pmx_distributions()`](https://iamstein.github.io/synpmx/reference/compare_pmx_distributions.md)
+is the numeric counterpart to the structural checks: it summarizes the
+dependent variable per endpoint and each baseline covariate, source
+against synthetic, so you can see at a glance that the ranges line up.
+Expect them to be close in magnitude and shape, not identical — AVATAR
+does not reproduce the source distribution exactly. Like every
+source-derived diagnostic it is marked restricted and stays inside the
+source data’s access controls.
+
+``` r
+
+theo_dist <- compare_pmx_distributions(theo_md, theo_synth, theo_roles)
+knitr::kable(theo_dist$endpoints, digits = 2,
+             caption = "Concentration distribution, source versus synthetic")
+```
+
+| variable | dataset   |   n | n_subjects | mean |  sd |   min |  q25 | median |  q75 |   max |
+|:---------|:----------|----:|-----------:|-----:|----:|------:|-----:|-------:|-----:|------:|
+| DV       | source    | 264 |         12 | 5.53 | 3.0 | -1.13 | 3.30 |   5.74 | 7.80 | 12.66 |
+| DV       | synthetic | 264 |         12 | 5.78 | 3.2 |  0.00 | 3.32 |   5.85 | 8.23 | 13.45 |
+
+Concentration distribution, source versus synthetic {.table}
+
+``` r
+
+knitr::kable(theo_dist$covariates_numeric, digits = 2,
+             caption = "Baseline weight distribution, source versus synthetic")
+```
+
+| variable | dataset   |   n |  mean |    sd |   min |   q25 | median |   q75 |   max |
+|:---------|:----------|----:|------:|------:|------:|------:|-------:|------:|------:|
+| WT       | source    |  12 | 69.58 |  9.50 | 54.60 | 63.57 |   70.5 | 74.43 | 86.40 |
+| WT       | synthetic |  12 | 73.47 | 10.52 | 54.36 | 68.72 |   72.4 | 81.29 | 86.63 |
+
+Baseline weight distribution, source versus synthetic {.table}
+
 ``` r
 
 theo_comparison <- rbind(

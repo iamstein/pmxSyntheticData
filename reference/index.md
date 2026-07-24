@@ -106,6 +106,9 @@ Structural checks on generated data, and restricted comparisons.
 - [`compare_pmx()`](https://iamstein.github.io/synpmx/reference/compare_pmx.md)
   : Compare source and generated PMX structures inside the restricted
   environment
+- [`compare_pmx_distributions()`](https://iamstein.github.io/synpmx/reference/compare_pmx_distributions.md)
+  : Compare per-covariate and per-endpoint distributions of source and
+  synthetic
 - [`sampling_summary()`](https://iamstein.github.io/synpmx/reference/sampling_summary.md)
   : Summarize the fitted sampling design
 - [`subject_property_summary()`](https://iamstein.github.io/synpmx/reference/subject_property_summary.md)
