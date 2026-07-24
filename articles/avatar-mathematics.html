@@ -98,7 +98,10 @@ user must declare them with <code><a href="../reference/pmx_roles.html">pmx_role
 <span>  dvid <span class="op">=</span> <span class="st">"DVID"</span>,</span>
 <span>  mdv <span class="op">=</span> <span class="st">"MDV"</span>,</span>
 <span>  rate <span class="op">=</span> <span class="st">"RATE"</span>,</span>
-<span>  covariates <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"WT"</span>, <span class="st">"AGE"</span>, <span class="st">"SEX"</span><span class="op">)</span></span>
+<span>  cens <span class="op">=</span> <span class="st">"CENS"</span>,           <span class="co"># below-limit indicator, if the study has BLQ data</span></span>
+<span>  limit <span class="op">=</span> <span class="st">"LIMIT"</span>,         <span class="co"># the other end of an interval, when used</span></span>
+<span>  covariates <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"WT"</span>, <span class="st">"AGE"</span>, <span class="st">"SEX"</span><span class="op">)</span>,</span>
+<span>  keep <span class="op">=</span> <span class="st">"ARM"</span>             <span class="co"># carried verbatim; see the allowlist below</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">roles</span></span>
 <span><span class="co">#&gt; Pharmacometric column roles:</span></span>
@@ -114,17 +117,24 @@ user must declare them with <code><a href="../reference/pmx_roles.html">pmx_role
 <span><span class="co">#&gt;   dvid: DVID</span></span>
 <span><span class="co">#&gt;   mdv: MDV</span></span>
 <span><span class="co">#&gt;   rate: RATE</span></span>
-<span><span class="co">#&gt;   cens: &lt;absent&gt;</span></span>
-<span><span class="co">#&gt;   limit: &lt;absent&gt;</span></span>
+<span><span class="co">#&gt;   cens: CENS</span></span>
+<span><span class="co">#&gt;   limit: LIMIT</span></span>
 <span><span class="co">#&gt;   addl: &lt;absent&gt;</span></span>
 <span><span class="co">#&gt;   ii: &lt;absent&gt;</span></span>
 <span><span class="co">#&gt;   assigned_dose: &lt;absent&gt;</span></span>
-<span><span class="co">#&gt;   covariates: WT, AGE, SEX</span></span></code></pre></div>
+<span><span class="co">#&gt;   covariates: WT, AGE, SEX</span></span>
+<span><span class="co">#&gt;   keep: ARM</span></span></code></pre></div>
 <p><code>id</code>, <code>time</code>, <code>dv</code>, and
-<code>evid</code> are required. <code>amt</code>, <code>cmt</code>,
-<code>dvid</code>, <code>mdv</code>, and <code>rate</code> are optional
-scalar roles; <code>covariates</code> can contain several baseline
-columns. One source column cannot be assigned to multiple roles.</p>
+<code>evid</code> are required; the rest are optional. <code>amt</code>,
+<code>cmt</code>, <code>mdv</code>, <code>rate</code>,
+<code>cens</code>, and <code>limit</code> each name one column.
+<code>dvid</code> names one column, or several that encode the same
+endpoint (see below). <code>covariates</code> and <code>keep</code> each
+take any number of columns. One source column cannot be assigned to two
+roles. The roles <code>subject_properties</code>,
+<code>assigned_dose</code>, and <code>exclude</code> belong to the
+differentially private engines only; <code><a href="../reference/synpmx_avatar.html">synpmx_avatar()</a></code>
+rejects them and points at the role that does the job here.</p>
 <div class="section level3">
 <h3 id="the-role-declaration-is-the-allowlist">The role declaration is the allowlist<a class="anchor" aria-label="anchor" href="#the-role-declaration-is-the-allowlist"></a>
 </h3>
@@ -184,8 +194,8 @@ real subject’s real value, unchanged. For a treatment arm, a dose group,
 or a randomization sequence — anything that must stay consistent with
 the doses AVATAR copied from the same anchor — <code>keep</code> is
 correct, precisely because it never leaves that anchor’s side. Because a
-kept value is a real subject’s real value, <code>keep</code> is for the
-trusted environment only.</p>
+kept value is a real subject’s real value, output containing it must
+stay within the source data’s own access controls and obligations.</p>
 <p>Redundant endpoint labels have their own handling. A dataset that
 carries both a numeric <code>YTYPE</code> and a character
 <code>NAME</code> for the same endpoint declares <strong>both</strong>
@@ -203,10 +213,20 @@ validation requires:</p>
 subject;</li>
 <li>numeric DV and finite nonmissing observations;</li>
 <li>an endpoint value on every eligible observation when DVID is
-declared; and</li>
-<li>every declared baseline covariate to be constant within
-subject.</li>
+declared;</li>
+<li>multiple <code>dvid</code> columns to be a consistent 1:1
+mapping;</li>
+<li>every declared baseline covariate to be constant within subject;
+and</li>
+<li>when <code>cens</code> is declared, each CENS flag to agree with its
+DV — a left-censored value at the limit cannot exceed an ordinary
+measurement of the same endpoint. A pooled dataset with two assays at
+different limits will trip this legitimately; synthesize one study at a
+time, or drop the <code>cens</code> role.</li>
 </ul>
+<p>Every error names the role and the column it maps to, and the count
+and an example of the offending rows, so a failure says exactly what to
+fix.</p>
 <p>Rows are eligible observations when EVID is zero and, if MDV is
 declared, MDV is also zero. A nonmissing DV is additionally required
 when a value is used to build a profile or donor trajectory. In symbols,
@@ -286,18 +306,19 @@ does <strong>not</strong> compute time after each dose.</p>
 </h3>
 <p>A conventional time-after-dose (TAD) variable resets after every
 dose. AVATAR does not use a declared <code>tad</code> role for alignment
-and never recomputes an existing TAD column. With multiple doses,
+and never recomputes a TAD column. With multiple doses,
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>t</mi><mo>*</mo></msup><annotation encoding="application/x-tex">t^*</annotation></semantics></math>
 continues to increase from the first qualifying dose; there is no later
-reset. An input TAD column is an unassigned column and is therefore
-copied from the anchor template.</p>
+reset. A declared <code>tad</code> column is retained and copied from
+the anchor template unchanged; an undeclared one is dropped, as any
+undeclared column is.</p>
 <p>This has two practical consequences:</p>
 <ol style="list-style-type: decimal">
 <li>Use the actual analysis-time column as <code>time</code>. Do not
 expect a TAD column to drive neighbor construction or
 interpolation.</li>
-<li>If <code>time_jitter &gt; 0</code>, an undeclared copied TAD column
-is not recalculated and can become inconsistent with the jittered TIME.
+<li>If <code>time_jitter &gt; 0</code>, a declared TAD column is copied,
+not recalculated, and can become inconsistent with the jittered TIME.
 Recompute TAD downstream if the workflow requires it.</li>
 </ol>
 </div>
@@ -637,6 +658,26 @@ repeated on every row of that synthetic subject.</p>
 <p>For factor, character, and logical covariates, one available donor
 category is sampled using the locally normalized weights. Categories are
 not averaged.</p>
+<div class="section level3">
+<h3 id="a-covariate-and-an-endpoint-are-blended-independently">A covariate and an endpoint are blended independently<a class="anchor" aria-label="anchor" href="#a-covariate-and-an-endpoint-are-blended-independently"></a>
+</h3>
+<p>Covariates (this step) and endpoint trajectories (the next) are
+generated in separate passes, each with its own donor weighting and its
+own perturbation. That is fine when they are unrelated, but some
+datasets carry a <strong>baseline covariate that is the same quantity as
+a longitudinal endpoint</strong> — a <code>B0</code> baseline B-cell
+count beside a B-cell kinetic endpoint, a baseline biomarker beside its
+own time course. AVATAR does not know they are linked, so a synthetic
+subject’s baseline covariate need not equal the baseline of its own
+generated trajectory. The two are individually plausible but not
+mutually consistent.</p>
+<p>This is a known limitation (<code>REV-022</code>). It is usually
+harmless for workflow-development use, where each column need only be
+realistic on its own. If your analysis relies on a covariate agreeing
+with an endpoint’s baseline, reconcile them after generation, or do not
+declare the redundant covariate and read the baseline from the
+trajectory instead.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="step-9-synthesize-each-endpoint-trajectory">Step 9: synthesize each endpoint trajectory<a class="anchor" aria-label="anchor" href="#step-9-synthesize-each-endpoint-trajectory"></a>

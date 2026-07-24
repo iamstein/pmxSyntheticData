@@ -126,6 +126,20 @@ paid for, use
 [`synpmx_generate()`](https://iamstein.github.io/synpmx/reference/synpmx_generate.md)
 or ask for several at once with `n_datasets`.
 
+## Maintenance status
+
+A secondary, provided-as-is path.
+[`synpmx_avatar()`](https://iamstein.github.io/synpmx/reference/synpmx_avatar.md)
+is the primary, maintained method. The differentially private modes are
+complete and tested but not under active development, carry known open
+findings, and have not been independently privacy-audited. Use them to
+demonstrate the privacy/utility tradeoff, not as a production release
+mechanism; a real regulated release needs specialist review and the
+external OpenDP backend. Requires a session-level acknowledgment: call
+[`synpmx_enable_dp_engines()`](https://iamstein.github.io/synpmx/reference/synpmx_enable_dp_engines.md)
+once before this function will run (unless `backend = "public"`, which
+makes no DP claim).
+
 ## See also
 
 [`synpmx_generate()`](https://iamstein.github.io/synpmx/reference/synpmx_generate.md)

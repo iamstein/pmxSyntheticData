@@ -101,8 +101,9 @@ pmx_roles(
   character `NAME` beside a numeric `dvid`. Because the value comes from
   the same anchor as the doses, it stays coherent with them. Contrast
   `covariates`, which are *blended* into new values across neighbours. A
-  kept value is one real subject's real value, so use it only inside a
-  trusted environment.
+  kept value is one real subject's real value, so use it only where the
+  source data's own access controls and confidentiality obligations
+  still apply.
 
 - exclude:
 

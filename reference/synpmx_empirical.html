@@ -167,6 +167,19 @@ again. To draw further datasets from the release you have already paid for,
 use <code><a href="synpmx_generate.html">synpmx_generate()</a></code> or ask for several at once with <code>n_datasets</code>.</p>
     </div>
     <div class="section level2">
+    <h2 id="maintenance-status">Maintenance status<a class="anchor" aria-label="anchor" href="#maintenance-status"></a></h2>
+
+
+<p>A secondary, provided-as-is path. <code><a href="synpmx_avatar.html">synpmx_avatar()</a></code> is the primary, maintained
+method. The differentially private modes are complete and tested but not under
+active development, carry known open findings, and have not been independently
+privacy-audited. Use them to demonstrate the privacy/utility tradeoff, not as
+a production release mechanism; a real regulated release needs specialist
+review and the external OpenDP backend. Requires a session-level
+acknowledgment: call <code><a href="synpmx_enable_dp_engines.html">synpmx_enable_dp_engines()</a></code> once before this function
+will run (unless <code>backend = "public"</code>, which makes no DP claim).</p>
+    </div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="synpmx_generate.html">synpmx_generate()</a></code> to draw more datasets for free,
 <code><a href="privacy_report.html">privacy_report()</a></code> for the realized accounting.</p></div>

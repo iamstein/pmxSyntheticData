@@ -290,14 +290,17 @@ source schema, fresh identifiers, and the same cohort size. The final
 section runs the model-based path on the same theophylline data, as
 <code>scripts/demo_nlmixr2data.R</code> does for all five.</p>
 <p>AVATAR output is <strong>not</strong> anonymous and carries
-<strong>no formal privacy guarantee</strong>. It is synthetic data for a
-trusted computing environment, in the same spirit as Novartis’s
-<code>synadam</code> (which resamples each column marginally from the
-data). It is not appropriate for parameter estimation, inference, model
-selection, or clinical decisions. When the generated data must cross a
-trust boundary, use one of the differentially private modes instead;
-<code><a href="../articles/synpmx-privacy.html">vignette("synpmx-privacy")</a></code> works through that decision and
-the tradeoff behind it.</p>
+<strong>no formal privacy guarantee</strong>. It is synthetic data that
+stays under the source data’s access controls and confidentiality
+obligations, in the same spirit as Novartis’s <code>synadam</code>
+(which resamples each column marginally from the data). Those
+obligations follow the data rather than the machine, so working with it
+on a local workstation covered by the same controls is a supported use.
+It is not appropriate for parameter estimation, inference, model
+selection, or clinical decisions. When the generated data would reach
+anyone the source data could not, use one of the differentially private
+modes instead; <code><a href="../articles/synpmx-privacy.html">vignette("synpmx-privacy")</a></code> works through
+that decision and the tradeoff behind it.</p>
 </div>
 <div class="section level2">
 <h2 id="shared-workflow">Shared workflow<a class="anchor" aria-label="anchor" href="#shared-workflow"></a>
@@ -1160,8 +1163,15 @@ five datasets. Repeating it here for theophylline shows how much more
 must be declared, and what is bought.</p>
 <p>The empirical engine measures the trajectory shape from the data
 through noised summaries. Every clipping range, contribution limit, and
-budget share is an explicit public input:</p>
+budget share is an explicit public input.
+<code><a href="../reference/synpmx_empirical.html">synpmx_empirical()</a></code> (like <code><a href="../reference/synpmx_calibrated.html">synpmx_calibrated()</a></code>)
+refuses to run until <code><a href="../reference/synpmx_enable_dp_engines.html">synpmx_enable_dp_engines()</a></code> has been
+called once in the session, acknowledging the maintenance status covered
+in <code><a href="../articles/synpmx-privacy.html">vignette("synpmx-privacy")</a></code>:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/synpmx_enable_dp_engines.html">synpmx_enable_dp_engines</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; DP engines enabled for this session: the differentially private engines are complete and tested, but not under active development, carry known open findings (see design/REVIEW_BACKLOG.md), and have not been independently privacy-audited. See vignette("synpmx-privacy") for the trust-boundary decision rule and what a production release additionally needs.</span></span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">theo_private</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synpmx_empirical.html">synpmx_empirical</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">theo_md</span>, roles <span class="op">=</span> <span class="va">theo_roles</span>,</span>
 <span>  endpoints <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>cp <span class="op">=</span> <span class="fu"><a href="../reference/pmx_endpoint.html">pmx_endpoint</a></span><span class="op">(</span></span>
@@ -1206,12 +1216,12 @@ budget share is an explicit public input:</p>
 <code><a href="../reference/synpmx_empirical.html">synpmx_empirical()</a></code> is called. The release it produced
 travels with the returned dataset, so any number of further datasets can
 be drawn from it as post-processing, without spending more budget:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">theo_private_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synpmx_generate.html">synpmx_generate</a></span><span class="op">(</span><span class="va">theo_private</span>, seed <span class="op">=</span> <span class="fl">708</span><span class="op">)</span>   <span class="co"># spends nothing</span></span></code></pre></div>
 <p>Reach for <code><a href="../reference/synpmx_generate.html">synpmx_generate()</a></code> rather than calling
 <code><a href="../reference/synpmx_empirical.html">synpmx_empirical()</a></code> a second time — a second call is a
 second release, and its budget has to be composed with the first.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">theo_private_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span>
 <span>  <span class="fu">observed_plot_data</span><span class="op">(</span><span class="va">theo_md</span>, <span class="va">theo_roles</span>, <span class="st">"Source"</span><span class="op">)</span>,</span>
 <span>  <span class="fu">observed_plot_data</span><span class="op">(</span><span class="va">theo_private</span>, <span class="va">theo_roles</span>, <span class="st">"Synthetic"</span><span class="op">)</span></span>
@@ -1253,11 +1263,12 @@ estimates, covariate-response relationships, and rare individual
 trajectories. Identifiers are always freshly generated and never reuse a
 source value.</p>
 <p>Not provided: any formal privacy guarantee. The synthetic data is
-built by blending real subject trajectories, so it is appropriate for a
-trusted environment, not for release across a trust boundary. See
-<code><a href="../articles/synpmx-method.html">vignette("synpmx-method")</a></code> for all four modes side by side
-and <code><a href="../articles/synpmx-privacy.html">vignette("synpmx-privacy")</a></code> for what differential
-privacy does and does not promise.</p>
+built by blending real subject trajectories, so it is appropriate
+wherever the source data’s own obligations still apply — including a
+local workstation under the same access controls — but not for release
+to anyone outside them. See <code><a href="../articles/synpmx-method.html">vignette("synpmx-method")</a></code> for
+all four modes side by side and <code><a href="../articles/synpmx-privacy.html">vignette("synpmx-privacy")</a></code>
+for what differential privacy does and does not promise.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

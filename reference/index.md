@@ -68,19 +68,34 @@ Contribution limits, budget, preflight, and the release ledger.
 
 - [`pmx_contribution_limits()`](https://iamstein.github.io/synpmx/reference/pmx_contribution_limits.md)
   : Declare subject contribution limits
+
 - [`pmx_budget_allocation()`](https://iamstein.github.io/synpmx/reference/pmx_budget_allocation.md)
   : Allocate an epsilon budget across private summary groups
+
 - [`pmx_preflight()`](https://iamstein.github.io/synpmx/reference/pmx_preflight.md)
   : Check whether a private release is worth its budget, before spending
   it
+
 - [`privacy_report()`](https://iamstein.github.io/synpmx/reference/privacy_report.md)
   : Summarize a fitted model's privacy contract
+
 - [`validate_private_model()`](https://iamstein.github.io/synpmx/reference/validate_private_model.md)
   : Validate a fitted private PMX population model
+
 - [`dp_backend_status()`](https://iamstein.github.io/synpmx/reference/dp_backend_status.md)
   : Inspect the differential-privacy backend
+
 - [`run_dp_backend_tests()`](https://iamstein.github.io/synpmx/reference/run_dp_backend_tests.md)
   : Run canonical checks against the configured DP backend
+
+- [`synpmx_enable_dp_engines()`](https://iamstein.github.io/synpmx/reference/synpmx_enable_dp_engines.md)
+  : Acknowledge the DP engines' unaudited status for this session
+
+- [`synpmx_disable_dp_engines()`](https://iamstein.github.io/synpmx/reference/synpmx_disable_dp_engines.md)
+  :
+
+  Withdraw the acknowledgment from
+  [`synpmx_enable_dp_engines()`](https://iamstein.github.io/synpmx/reference/synpmx_enable_dp_engines.md)
 
 ## Validation and diagnostics
 

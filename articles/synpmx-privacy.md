@@ -144,20 +144,39 @@ validation.
 
 The choice is a single question:
 
-> **Does the generated data cross a trust boundary?**
+> **Does the generated data reach anyone the source data could not?**
 
-- **Stays inside** the safe environment — you are the only consumer,
-  governance and access controls apply → use **AVATAR**
+- **No** — the same organization, under the same access controls and
+  confidentiality obligations → use **AVATAR**
   ([`synpmx_avatar()`](https://iamstein.github.io/synpmx/reference/synpmx_avatar.md)).
   Its lack of a formal guarantee costs nothing, because there is no
   adversary to guarantee against.
-- **Crosses out** — shared with a partner or vendor, published, or moved
-  to a less-controlled system → use a **DP** engine. A formal guarantee
-  is the only thing that survives a determined adversary.
+- **Yes** — shared with a partner or vendor, published, or moved to a
+  system outside those obligations → use a **DP** engine. A formal
+  guarantee is the only thing that survives a determined adversary.
+
+The boundary is drawn by **obligations, not by geography**. It is about
+who may see the data and under what duty, not about which machine holds
+it. Copying AVATAR output from a validated environment onto an analyst
+workstation does not cross it, provided that workstation is covered by
+the same access controls and the same confidentiality obligations as the
+source data — that is a supported use of this package, and is much of
+why it exists. Emailing the same file to a vendor does cross it, no
+matter which machine it was sent from.
+
+Two things follow, and neither is softened by the reframing. First,
+AVATAR output is assembled from real subject trajectories: it is not
+anonymous, it carries no formal guarantee, and it inherits the source
+data’s handling obligations wherever it goes. Second, whether a
+particular destination sits inside your boundary is a determination for
+your organization’s governance, not one this package can make for you.
+What is written here is the rule; applying it to your systems is a
+sponsor decision.
 
 Differential privacy is expensive precisely because it defends against
 someone who wants to break it. Buy it when the output will be handed to
-strangers; skip it when nothing can reach the output.
+strangers; skip it when nothing outside the source data’s own
+obligations can reach the output.
 
 ## The differentially private engines
 
@@ -188,6 +207,30 @@ dp_backend_status()
 #>   backend available version production
 #> 1  OpenDP      TRUE  0.15.1       TRUE
 ```
+
+### The unaudited status is enforced, not just documented
+
+Both engines are complete and tested, but not under active development,
+carry known open findings tracked in `design/REVIEW_BACKLOG.md`, and
+have not been independently privacy-audited. Treat them as a principled
+demonstration of the privacy/utility tradeoff, not as a production
+release mechanism — a real regulated release needs specialist review.
+
+That distinction used to live in documentation alone, which made the
+risky path exactly as easy to call as
+[`synpmx_avatar()`](https://iamstein.github.io/synpmx/reference/synpmx_avatar.md).
+Both functions now refuse to run until
+[`synpmx_enable_dp_engines()`](https://iamstein.github.io/synpmx/reference/synpmx_enable_dp_engines.md)
+has been called once in the current session:
+
+``` r
+
+synpmx_enable_dp_engines()
+```
+
+The acknowledgment does not persist across sessions, script runs, or CI
+jobs — each one must call it again. `backend = "public"` calls make no
+DP claim already and are exempt from the gate.
 
 ### Budget is spent once, per call
 
@@ -230,7 +273,8 @@ enforce for you.
 ## Choosing an epsilon
 
 Everything below applies to the **differentially private** modes only.
-If your synthetic data stays inside a trusted environment, use
+If your synthetic data stays within the source data’s own access
+controls and obligations, use
 [`synpmx_avatar()`](https://iamstein.github.io/synpmx/reference/synpmx_avatar.md)
 and ignore epsilon entirely.
 

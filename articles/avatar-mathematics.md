@@ -30,7 +30,10 @@ roles <- pmx_roles(
   dvid = "DVID",
   mdv = "MDV",
   rate = "RATE",
-  covariates = c("WT", "AGE", "SEX")
+  cens = "CENS",           # below-limit indicator, if the study has BLQ data
+  limit = "LIMIT",         # the other end of an interval, when used
+  covariates = c("WT", "AGE", "SEX"),
+  keep = "ARM"             # carried verbatim; see the allowlist below
 )
 roles
 #> Pharmacometric column roles:
@@ -46,18 +49,24 @@ roles
 #>   dvid: DVID
 #>   mdv: MDV
 #>   rate: RATE
-#>   cens: <absent>
-#>   limit: <absent>
+#>   cens: CENS
+#>   limit: LIMIT
 #>   addl: <absent>
 #>   ii: <absent>
 #>   assigned_dose: <absent>
 #>   covariates: WT, AGE, SEX
+#>   keep: ARM
 ```
 
-`id`, `time`, `dv`, and `evid` are required. `amt`, `cmt`, `dvid`,
-`mdv`, and `rate` are optional scalar roles; `covariates` can contain
-several baseline columns. One source column cannot be assigned to
-multiple roles.
+`id`, `time`, `dv`, and `evid` are required; the rest are optional.
+`amt`, `cmt`, `mdv`, `rate`, `cens`, and `limit` each name one column.
+`dvid` names one column, or several that encode the same endpoint (see
+below). `covariates` and `keep` each take any number of columns. One
+source column cannot be assigned to two roles. The roles
+`subject_properties`, `assigned_dose`, and `exclude` belong to the
+differentially private engines only;
+[`synpmx_avatar()`](https://iamstein.github.io/synpmx/reference/synpmx_avatar.md)
+rejects them and points at the role that does the job here.
 
 ### The role declaration is the allowlist
 
@@ -88,8 +97,8 @@ one real subject’s real value, unchanged. For a treatment arm, a dose
 group, or a randomization sequence — anything that must stay consistent
 with the doses AVATAR copied from the same anchor — `keep` is correct,
 precisely because it never leaves that anchor’s side. Because a kept
-value is a real subject’s real value, `keep` is for the trusted
-environment only.
+value is a real subject’s real value, output containing it must stay
+within the source data’s own access controls and obligations.
 
 Redundant endpoint labels have their own handling. A dataset that
 carries both a numeric `YTYPE` and a character `NAME` for the same
@@ -108,8 +117,16 @@ requires:
 - finite numeric TIME values and nondecreasing TIME within subject;
 - numeric DV and finite nonmissing observations;
 - an endpoint value on every eligible observation when DVID is declared;
-  and
-- every declared baseline covariate to be constant within subject.
+- multiple `dvid` columns to be a consistent 1:1 mapping;
+- every declared baseline covariate to be constant within subject; and
+- when `cens` is declared, each CENS flag to agree with its DV — a
+  left-censored value at the limit cannot exceed an ordinary measurement
+  of the same endpoint. A pooled dataset with two assays at different
+  limits will trip this legitimately; synthesize one study at a time, or
+  drop the `cens` role.
+
+Every error names the role and the column it maps to, and the count and
+an example of the offending rows, so a failure says exactly what to fix.
 
 Rows are eligible observations when EVID is zero and, if MDV is
 declared, MDV is also zero. A nonmissing DV is additionally required
@@ -183,17 +200,17 @@ This removes a subject-specific calendar or study-time offset. It does
 
 A conventional time-after-dose (TAD) variable resets after every dose.
 AVATAR does not use a declared `tad` role for alignment and never
-recomputes an existing TAD column. With multiple doses, $`t^*`$
-continues to increase from the first qualifying dose; there is no later
-reset. An input TAD column is an unassigned column and is therefore
-copied from the anchor template.
+recomputes a TAD column. With multiple doses, $`t^*`$ continues to
+increase from the first qualifying dose; there is no later reset. A
+declared `tad` column is retained and copied from the anchor template
+unchanged; an undeclared one is dropped, as any undeclared column is.
 
 This has two practical consequences:
 
 1.  Use the actual analysis-time column as `time`. Do not expect a TAD
     column to drive neighbor construction or interpolation.
-2.  If `time_jitter > 0`, an undeclared copied TAD column is not
-    recalculated and can become inconsistent with the jittered TIME.
+2.  If `time_jitter > 0`, a declared TAD column is copied, not
+    recalculated, and can become inconsistent with the jittered TIME.
     Recompute TAD downstream if the workflow requires it.
 
 ### Different observation times across subjects
@@ -500,6 +517,25 @@ synthetic subject.
 For factor, character, and logical covariates, one available donor
 category is sampled using the locally normalized weights. Categories are
 not averaged.
+
+### A covariate and an endpoint are blended independently
+
+Covariates (this step) and endpoint trajectories (the next) are
+generated in separate passes, each with its own donor weighting and its
+own perturbation. That is fine when they are unrelated, but some
+datasets carry a **baseline covariate that is the same quantity as a
+longitudinal endpoint** — a `B0` baseline B-cell count beside a B-cell
+kinetic endpoint, a baseline biomarker beside its own time course.
+AVATAR does not know they are linked, so a synthetic subject’s baseline
+covariate need not equal the baseline of its own generated trajectory.
+The two are individually plausible but not mutually consistent.
+
+This is a known limitation (`REV-022`). It is usually harmless for
+workflow-development use, where each column need only be realistic on
+its own. If your analysis relies on a covariate agreeing with an
+endpoint’s baseline, reconcile them after generation, or do not declare
+the redundant covariate and read the baseline from the trajectory
+instead.
 
 ## Step 9: synthesize each endpoint trajectory
 

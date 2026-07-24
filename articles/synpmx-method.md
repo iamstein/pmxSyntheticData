@@ -81,16 +81,20 @@ validate_pmx(avatar, theo_roles)$valid
 ```
 
 Nothing was elicited, nothing was assumed, and the output keeps the
-source schema and cohort size. On a 12-subject dataset
+cohort size and every column named in `theo_roles`.
 [`synpmx_avatar()`](https://iamstein.github.io/synpmx/reference/synpmx_avatar.md)
-also emits documented small-group fallback warnings (some event-pattern
-groups have only one usable donor); they are suppressed above and
-explained in the [AVATAR mathematics
+keeps only role-named columns and drops the rest — so a stray identifier
+cannot leak out of a real subject by being forgotten — and here every
+`theo_md` column has a role, so nothing is dropped. On a 12-subject
+dataset it also emits documented small-group fallback warnings (some
+event-pattern groups have only one usable donor); they are suppressed
+above and explained in the [AVATAR mathematics
 article](https://iamstein.github.io/synpmx/articles/avatar-mathematics.html).
 
 What you cannot say about this output is that it is anonymous. It is
-assembled from real trajectories, so it belongs inside the trusted
-environment.
+assembled from real trajectories, so it inherits the source data’s
+handling obligations wherever it is used — a constraint on who may see
+it, not on which machine holds it.
 
 ## Mode 2: prior only
 
@@ -158,8 +162,25 @@ the prior.
 ## Mode 3: calibration
 
 The middle path, and the recommended one when a formal guarantee is
-needed and the cohort is small. Keep the public model’s *shape*, and
-spend a small privacy budget correcting only its *magnitude*.
+needed and the cohort is small. Both
+[`synpmx_calibrated()`](https://iamstein.github.io/synpmx/reference/synpmx_calibrated.md)
+and
+[`synpmx_empirical()`](https://iamstein.github.io/synpmx/reference/synpmx_empirical.md)
+refuse to run until
+[`synpmx_enable_dp_engines()`](https://iamstein.github.io/synpmx/reference/synpmx_enable_dp_engines.md)
+has been called once in the session — a deliberate speed bump, not a
+technical safeguard, so that the maintenance status below cannot be
+reached by accident. `backend = "public"` calls, like the ones in this
+vignette, make no DP claim and are exempt.
+
+``` r
+
+synpmx_enable_dp_engines()
+#> DP engines enabled for this session: the differentially private engines are complete and tested, but not under active development, carry known open findings (see design/REVIEW_BACKLOG.md), and have not been independently privacy-audited. See vignette("synpmx-privacy") for the trust-boundary decision rule and what a production release additionally needs.
+```
+
+Keep the public model’s *shape*, and spend a small privacy budget
+correcting only its *magnitude*.
 
 Each subject is reduced to a bounded multiplicative correction of the
 model’s own prediction, clipped to a public prior range, and released
@@ -383,9 +404,11 @@ Where each mode belongs:
 Two rules of thumb behind the table:
 
 - **The trust boundary decides whether you need DP.** Ask whether the
-  generated data can reach anyone the source data could not. If not,
-  AVATAR is more useful and its lack of a formal guarantee costs
-  nothing. If so, only an accounted release holds up.
+  generated data can reach anyone the source data could not — people and
+  obligations, not machines. A workstation under the same access
+  controls reaches no one new. If no one new, AVATAR is more useful and
+  its lack of a formal guarantee costs nothing. If someone new, only an
+  accounted release holds up.
 - **The cohort size decides which DP mode is usable.** Epsilon buys
   accuracy in proportion to the number of subjects and in inverse
   proportion to how many quantities you release. At 12 subjects,

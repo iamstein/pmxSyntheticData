@@ -265,24 +265,42 @@ undergone no attack-based privacy validation.</p>
 </h2>
 <p>The choice is a single question:</p>
 <blockquote>
-<p><strong>Does the generated data cross a trust boundary?</strong></p>
+<p><strong>Does the generated data reach anyone the source data could
+not?</strong></p>
 </blockquote>
 <ul>
 <li>
-<strong>Stays inside</strong> the safe environment — you are the
-only consumer, governance and access controls apply → use
-<strong>AVATAR</strong> (<code><a href="../reference/synpmx_avatar.html">synpmx_avatar()</a></code>). Its lack of a
-formal guarantee costs nothing, because there is no adversary to
-guarantee against.</li>
+<strong>No</strong> — the same organization, under the same access
+controls and confidentiality obligations → use <strong>AVATAR</strong>
+(<code><a href="../reference/synpmx_avatar.html">synpmx_avatar()</a></code>). Its lack of a formal guarantee costs
+nothing, because there is no adversary to guarantee against.</li>
 <li>
-<strong>Crosses out</strong> — shared with a partner or vendor,
-published, or moved to a less-controlled system → use a
+<strong>Yes</strong> — shared with a partner or vendor, published,
+or moved to a system outside those obligations → use a
 <strong>DP</strong> engine. A formal guarantee is the only thing that
 survives a determined adversary.</li>
 </ul>
+<p>The boundary is drawn by <strong>obligations, not by
+geography</strong>. It is about who may see the data and under what
+duty, not about which machine holds it. Copying AVATAR output from a
+validated environment onto an analyst workstation does not cross it,
+provided that workstation is covered by the same access controls and the
+same confidentiality obligations as the source data — that is a
+supported use of this package, and is much of why it exists. Emailing
+the same file to a vendor does cross it, no matter which machine it was
+sent from.</p>
+<p>Two things follow, and neither is softened by the reframing. First,
+AVATAR output is assembled from real subject trajectories: it is not
+anonymous, it carries no formal guarantee, and it inherits the source
+data’s handling obligations wherever it goes. Second, whether a
+particular destination sits inside your boundary is a determination for
+your organization’s governance, not one this package can make for you.
+What is written here is the rule; applying it to your systems is a
+sponsor decision.</p>
 <p>Differential privacy is expensive precisely because it defends
 against someone who wants to break it. Buy it when the output will be
-handed to strangers; skip it when nothing can reach the output.</p>
+handed to strangers; skip it when nothing outside the source data’s own
+obligations can reach the output.</p>
 </div>
 <div class="section level2">
 <h2 id="the-differentially-private-engines">The differentially private engines<a class="anchor" aria-label="anchor" href="#the-differentially-private-engines"></a>
@@ -314,13 +332,33 @@ noise for a calibrated mechanism:</p>
 <span><span class="co">#&gt;   backend available version production</span></span>
 <span><span class="co">#&gt; 1  OpenDP      TRUE  0.15.1       TRUE</span></span></code></pre></div>
 <div class="section level3">
+<h3 id="the-unaudited-status-is-enforced-not-just-documented">The unaudited status is enforced, not just documented<a class="anchor" aria-label="anchor" href="#the-unaudited-status-is-enforced-not-just-documented"></a>
+</h3>
+<p>Both engines are complete and tested, but not under active
+development, carry known open findings tracked in
+<code>design/REVIEW_BACKLOG.md</code>, and have not been independently
+privacy-audited. Treat them as a principled demonstration of the
+privacy/utility tradeoff, not as a production release mechanism — a real
+regulated release needs specialist review.</p>
+<p>That distinction used to live in documentation alone, which made the
+risky path exactly as easy to call as <code><a href="../reference/synpmx_avatar.html">synpmx_avatar()</a></code>. Both
+functions now refuse to run until
+<code><a href="../reference/synpmx_enable_dp_engines.html">synpmx_enable_dp_engines()</a></code> has been called once in the
+current session:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/synpmx_enable_dp_engines.html">synpmx_enable_dp_engines</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>The acknowledgment does not persist across sessions, script runs, or
+CI jobs — each one must call it again. <code>backend = "public"</code>
+calls make no DP claim already and are exempt from the gate.</p>
+</div>
+<div class="section level3">
 <h3 id="budget-is-spent-once-per-call">Budget is spent once, per call<a class="anchor" aria-label="anchor" href="#budget-is-spent-once-per-call"></a>
 </h3>
 <p>Both functions read the confidential data exactly once and return a
 synthetic dataset with the resulting release attached to it. Generating
 from that release again is post-processing: it reads nothing and costs
 nothing.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">syn</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synpmx_calibrated.html">synpmx_calibrated</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">roles</span>, <span class="va">model</span>, <span class="va">design</span>, <span class="va">priors</span>, epsilon <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">syn2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synpmx_generate.html">synpmx_generate</a></span><span class="op">(</span><span class="va">syn</span>, seed <span class="op">=</span> <span class="fl">202</span><span class="op">)</span>   <span class="co"># free</span></span>
 <span><span class="fu"><a href="../reference/privacy_report.html">privacy_report</a></span><span class="op">(</span><span class="va">syn</span><span class="op">)</span>                        <span class="co"># the realized accounting</span></span></code></pre></div>
@@ -356,9 +394,9 @@ Ranges chosen by looking at the data break it silently.</li>
 <h2 id="choosing-an-epsilon">Choosing an epsilon<a class="anchor" aria-label="anchor" href="#choosing-an-epsilon"></a>
 </h2>
 <p>Everything below applies to the <strong>differentially
-private</strong> modes only. If your synthetic data stays inside a
-trusted environment, use <code><a href="../reference/synpmx_avatar.html">synpmx_avatar()</a></code> and ignore epsilon
-entirely.</p>
+private</strong> modes only. If your synthetic data stays within the
+source data’s own access controls and obligations, use
+<code><a href="../reference/synpmx_avatar.html">synpmx_avatar()</a></code> and ignore epsilon entirely.</p>
 <p>Epsilon is the one-person influence limit: smaller means stronger
 privacy and more noise, larger means weaker privacy and less noise.
 There is no universal default; an approved value must come from
@@ -373,7 +411,7 @@ one quantity:</p>
 of the prior’s width that survives as noise. The
 <code><a href="../reference/pmx_preflight.html">pmx_preflight()</a></code> helper reports it before any budget is
 spent:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">priors</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pmx_priors.html">pmx_priors</a></span><span class="op">(</span>pk <span class="op">=</span> <span class="fu"><a href="../reference/pmx_prior.html">pmx_prior</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span> <span class="op">/</span> <span class="fl">4</span>, <span class="fl">4</span><span class="op">)</span>, source <span class="op">=</span> <span class="st">"example"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/pmx_preflight.html">pmx_preflight</a></span><span class="op">(</span><span class="va">priors</span>, epsilon <span class="op">=</span> <span class="fl">0.5</span>, n_subjects <span class="op">=</span> <span class="fl">60</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Pre-flight: d = 2, epsilon = 0.5, N = 60  -&gt;  f = 0.067</span></span>

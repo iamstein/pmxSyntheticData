@@ -218,11 +218,14 @@ model-based path on the same theophylline data, as
 `scripts/demo_nlmixr2data.R` does for all five.
 
 AVATAR output is **not** anonymous and carries **no formal privacy
-guarantee**. It is synthetic data for a trusted computing environment,
-in the same spirit as Novartis’s `synadam` (which resamples each column
-marginally from the data). It is not appropriate for parameter
-estimation, inference, model selection, or clinical decisions. When the
-generated data must cross a trust boundary, use one of the
+guarantee**. It is synthetic data that stays under the source data’s
+access controls and confidentiality obligations, in the same spirit as
+Novartis’s `synadam` (which resamples each column marginally from the
+data). Those obligations follow the data rather than the machine, so
+working with it on a local workstation covered by the same controls is a
+supported use. It is not appropriate for parameter estimation,
+inference, model selection, or clinical decisions. When the generated
+data would reach anyone the source data could not, use one of the
 differentially private modes instead;
 [`vignette("synpmx-privacy")`](https://iamstein.github.io/synpmx/articles/synpmx-privacy.md)
 works through that decision and the tradeoff behind it.
@@ -638,7 +641,21 @@ declared, and what is bought.
 
 The empirical engine measures the trajectory shape from the data through
 noised summaries. Every clipping range, contribution limit, and budget
-share is an explicit public input:
+share is an explicit public input.
+[`synpmx_empirical()`](https://iamstein.github.io/synpmx/reference/synpmx_empirical.md)
+(like
+[`synpmx_calibrated()`](https://iamstein.github.io/synpmx/reference/synpmx_calibrated.md))
+refuses to run until
+[`synpmx_enable_dp_engines()`](https://iamstein.github.io/synpmx/reference/synpmx_enable_dp_engines.md)
+has been called once in the session, acknowledging the maintenance
+status covered in
+[`vignette("synpmx-privacy")`](https://iamstein.github.io/synpmx/articles/synpmx-privacy.md):
+
+``` r
+
+synpmx_enable_dp_engines()
+#> DP engines enabled for this session: the differentially private engines are complete and tested, but not under active development, carry known open findings (see design/REVIEW_BACKLOG.md), and have not been independently privacy-audited. See vignette("synpmx-privacy") for the trust-boundary decision rule and what a production release additionally needs.
+```
 
 ``` r
 
@@ -750,8 +767,10 @@ trajectories. Identifiers are always freshly generated and never reuse a
 source value.
 
 Not provided: any formal privacy guarantee. The synthetic data is built
-by blending real subject trajectories, so it is appropriate for a
-trusted environment, not for release across a trust boundary. See
+by blending real subject trajectories, so it is appropriate wherever the
+source data’s own obligations still apply — including a local
+workstation under the same access controls — but not for release to
+anyone outside them. See
 [`vignette("synpmx-method")`](https://iamstein.github.io/synpmx/articles/synpmx-method.md)
 for all four modes side by side and
 [`vignette("synpmx-privacy")`](https://iamstein.github.io/synpmx/articles/synpmx-privacy.md)

@@ -156,14 +156,18 @@ compatible neighbors, plus noise.</p>
 <span><span class="fu"><a href="../reference/validate_pmx.html">validate_pmx</a></span><span class="op">(</span><span class="va">avatar</span>, <span class="va">theo_roles</span><span class="op">)</span><span class="op">$</span><span class="va">valid</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
 <p>Nothing was elicited, nothing was assumed, and the output keeps the
-source schema and cohort size. On a 12-subject dataset
-<code><a href="../reference/synpmx_avatar.html">synpmx_avatar()</a></code> also emits documented small-group fallback
-warnings (some event-pattern groups have only one usable donor); they
-are suppressed above and explained in the <a href="https://iamstein.github.io/synpmx/articles/avatar-mathematics.html">AVATAR
+cohort size and every column named in <code>theo_roles</code>.
+<code><a href="../reference/synpmx_avatar.html">synpmx_avatar()</a></code> keeps only role-named columns and drops the
+rest — so a stray identifier cannot leak out of a real subject by being
+forgotten — and here every <code>theo_md</code> column has a role, so
+nothing is dropped. On a 12-subject dataset it also emits documented
+small-group fallback warnings (some event-pattern groups have only one
+usable donor); they are suppressed above and explained in the <a href="https://iamstein.github.io/synpmx/articles/avatar-mathematics.html">AVATAR
 mathematics article</a>.</p>
 <p>What you cannot say about this output is that it is anonymous. It is
-assembled from real trajectories, so it belongs inside the trusted
-environment.</p>
+assembled from real trajectories, so it inherits the source data’s
+handling obligations wherever it is used — a constraint on who may see
+it, not on which machine holds it.</p>
 </div>
 <div class="section level2">
 <h2 id="mode-2-prior-only">Mode 2: prior only<a class="anchor" aria-label="anchor" href="#mode-2-prior-only"></a>
@@ -227,14 +231,23 @@ the data is exactly as good as the prior.</p>
 <h2 id="mode-3-calibration">Mode 3: calibration<a class="anchor" aria-label="anchor" href="#mode-3-calibration"></a>
 </h2>
 <p>The middle path, and the recommended one when a formal guarantee is
-needed and the cohort is small. Keep the public model’s <em>shape</em>,
-and spend a small privacy budget correcting only its
-<em>magnitude</em>.</p>
+needed and the cohort is small. Both <code><a href="../reference/synpmx_calibrated.html">synpmx_calibrated()</a></code>
+and <code><a href="../reference/synpmx_empirical.html">synpmx_empirical()</a></code> refuse to run until
+<code><a href="../reference/synpmx_enable_dp_engines.html">synpmx_enable_dp_engines()</a></code> has been called once in the
+session — a deliberate speed bump, not a technical safeguard, so that
+the maintenance status below cannot be reached by accident.
+<code>backend = "public"</code> calls, like the ones in this vignette,
+make no DP claim and are exempt.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/synpmx_enable_dp_engines.html">synpmx_enable_dp_engines</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; DP engines enabled for this session: the differentially private engines are complete and tested, but not under active development, carry known open findings (see design/REVIEW_BACKLOG.md), and have not been independently privacy-audited. See vignette("synpmx-privacy") for the trust-boundary decision rule and what a production release additionally needs.</span></span></code></pre></div>
+<p>Keep the public model’s <em>shape</em>, and spend a small privacy
+budget correcting only its <em>magnitude</em>.</p>
 <p>Each subject is reduced to a bounded multiplicative correction of the
 model’s own prediction, clipped to a public prior range, and released
 with calibrated noise. Only two numbers leave the data: the correction
 and a noised subject count.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">priors</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pmx_priors.html">pmx_priors</a></span><span class="op">(</span>pk <span class="op">=</span> <span class="fu"><a href="../reference/pmx_prior.html">pmx_prior</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span> <span class="op">/</span> <span class="fl">4</span>, <span class="fl">4</span><span class="op">)</span>, source <span class="op">=</span> <span class="st">"scaling literature"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/pmx_preflight.html">pmx_preflight</a></span><span class="op">(</span><span class="va">priors</span>, epsilon <span class="op">=</span> <span class="fl">1</span>, n_subjects <span class="op">=</span> <span class="fl">12</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Pre-flight: d = 2, epsilon = 1, N = 12  -&gt;  f = 0.167</span></span>
@@ -246,7 +259,7 @@ and a noised subject count.</p>
 <p><code><a href="../reference/pmx_preflight.html">pmx_preflight()</a></code> costs nothing and reads no data: it
 answers “is this release worth its budget?” before any budget is
 spent.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">calibrated_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synpmx_calibrated.html">synpmx_calibrated</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">theo_md</span>, roles <span class="op">=</span> <span class="va">theo_roles</span>, model <span class="op">=</span> <span class="va">theo_model</span>,</span>
 <span>  design <span class="op">=</span> <span class="va">theo_design</span>, priors <span class="op">=</span> <span class="va">priors</span>, epsilon <span class="op">=</span> <span class="fl">1</span>, seed <span class="op">=</span> <span class="fl">303</span>,</span>
@@ -255,7 +268,7 @@ spent.</p>
 <p>The correction pulled the assumed clearance toward the data. The
 release that produced this dataset travels with it, so the accounting is
 always at hand:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">calibrated_data</span>, <span class="st">"synpmx_release"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Calibrated structural model (v3)</span></span>
 <span><span class="co">#&gt;   released subject count: 12</span></span>
@@ -267,20 +280,20 @@ always at hand:</p>
 cost nothing. Draw them with <code><a href="../reference/synpmx_generate.html">synpmx_generate()</a></code> rather than
 by calling <code><a href="../reference/synpmx_calibrated.html">synpmx_calibrated()</a></code> again — a second fit would
 spend the budget a second time.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">another</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synpmx_generate.html">synpmx_generate</a></span><span class="op">(</span><span class="va">calibrated_data</span>, seed <span class="op">=</span> <span class="fl">304</span><span class="op">)</span>   <span class="co"># spends nothing</span></span></code></pre></div>
 <p>Two honest notes. First, <code>backend = "public"</code> is used here
 because <code>theo_md</code> is already public: it makes the release
 <strong>noiseless</strong> and therefore makes no DP claim, which the
 printed model states. A confidential fit uses the default validated
 backend and fails closed if it is unavailable:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">calibrated</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synpmx_calibrated.html">synpmx_calibrated</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">confidential</span>, roles <span class="op">=</span> <span class="va">theo_roles</span>, model <span class="op">=</span> <span class="va">theo_model</span>,</span>
 <span>  design <span class="op">=</span> <span class="va">theo_design</span>, priors <span class="op">=</span> <span class="va">priors</span>, epsilon <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  backend <span class="op">=</span> <span class="st">"opendp"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/dp_backend_status.html">dp_backend_status</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   backend available version production</span></span>
 <span><span class="co">#&gt; 1  OpenDP      TRUE  0.15.1       TRUE</span></span></code></pre></div>
@@ -303,7 +316,7 @@ contain, and pays for it by splitting one epsilon across many released
 quantities.</p>
 <p>It also needs the most declaration: every clipping range,
 contribution limit, and budget share is an explicit public input.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">empirical_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synpmx_empirical.html">synpmx_empirical</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">theo_md</span>, roles <span class="op">=</span> <span class="va">theo_roles</span>,</span>
 <span>  endpoints <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>cp <span class="op">=</span> <span class="fu"><a href="../reference/pmx_endpoint.html">pmx_endpoint</a></span><span class="op">(</span></span>
@@ -341,7 +354,7 @@ corpora, not on twelve subjects.</p>
 <div class="section level2">
 <h2 id="the-four-side-by-side">The four side by side<a class="anchor" aria-label="anchor" href="#the-four-side-by-side"></a>
 </h2>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">generated_roles</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pmx_generated_roles.html">pmx_generated_roles</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">all_observations</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span>
 <span>  <span class="fu">observations</span><span class="op">(</span><span class="va">theo_md</span>, <span class="va">theo_roles</span>, <span class="st">"Source"</span><span class="op">)</span>,</span>
@@ -413,7 +426,7 @@ corpora, not on twelve subjects.</p>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">all_observations</span>,</span>
 <span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">dv</span>, group <span class="op">=</span> <span class="va">subject</span><span class="op">)</span></span>
@@ -543,9 +556,11 @@ question entirely.</td>
 <ul>
 <li>
 <strong>The trust boundary decides whether you need DP.</strong> Ask
-whether the generated data can reach anyone the source data could not.
-If not, AVATAR is more useful and its lack of a formal guarantee costs
-nothing. If so, only an accounted release holds up.</li>
+whether the generated data can reach anyone the source data could not —
+people and obligations, not machines. A workstation under the same
+access controls reaches no one new. If no one new, AVATAR is more useful
+and its lack of a formal guarantee costs nothing. If someone new, only
+an accounted release holds up.</li>
 <li>
 <strong>The cohort size decides which DP mode is usable.</strong>
 Epsilon buys accuracy in proportion to the number of subjects and in
