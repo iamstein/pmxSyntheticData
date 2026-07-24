@@ -145,6 +145,20 @@ message("  generated ", nrow(synthetic), " rows for ",
 write.csv(synthetic, file.path(OUT_DIR, "avatar_synthetic.csv"), row.names = FALSE)
 ```
 
+### Restricted diagnostic: distribution summary
+
+Source-derived. Keep it in the safe environment; do not export these tables.
+
+`compare_pmx_distributions()` summarizes the dependent variable per endpoint and
+each baseline covariate, source against synthetic -- a quick numeric range check
+before the plot. Expect the summaries to line up in magnitude and shape, not to
+match exactly, since AVATAR does not reproduce the source distribution.
+
+```{r}
+#| label: distribution-summary
+print(compare_pmx_distributions(raw, synthetic, roles))
+```
+
 ### Restricted diagnostic: source vs synthetic
 
 Source-derived. Keep it in the safe environment; do not export the figure.

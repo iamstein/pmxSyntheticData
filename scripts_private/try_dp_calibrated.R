@@ -250,6 +250,20 @@ saveRDS(fit, file.path(OUT_DIR, "calibrated_model.rds"))
 # ---- RESTRICTED diagnostic: source vs both versions ------------------------
 # Source-derived. Keep it in the safe environment; do not export these figures.
 message("\n== Restricted comparison (do not export) ==")
+
+# Numeric range check per endpoint (and, for the source, per covariate). The DP
+# outputs use the fixed generated schema (pmx_generated_roles()), not the source
+# roles, so each dataset is summarized on its own rather than as a single
+# side-by-side table; read the endpoint rows across the three printouts. Expect
+# the DP versions to be close in magnitude, not exact -- that is the noise.
+message("\n-- source distribution --")
+print(compare_pmx_distributions(raw, roles = roles))
+message("\n-- prior-only distribution --")
+print(compare_pmx_distributions(prior_synthetic, roles = pmx_generated_roles()))
+message("\n-- calibrated distribution --")
+print(compare_pmx_distributions(calibrated_synthetic,
+                                roles = pmx_generated_roles()))
+
 if (requireNamespace("ggplot2", quietly = TRUE)) {
   obs <- function(d, r, label) {
     keep <- d[[r$evid]] == 0 & !is.na(d[[r$dv]])
