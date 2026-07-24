@@ -213,6 +213,14 @@ print(pmx_preflight(PRIORS, epsilon = EPSILON, n_subjects = n_subjects,
 
 # ---- CALIBRATED version: the only budget-spending step ---------------------
 message("\n== CALIBRATED version ==")
+
+# synpmx_calibrated() is one of the DP engines: complete and tested, but not
+# under active development, carrying known open findings, and not
+# independently privacy-audited (design/REVIEW_BACKLOG.md REV-023). It
+# refuses to run against a real backend without this acknowledgment, which
+# does not persist across runs of this script -- that is deliberate.
+synpmx_enable_dp_engines()
+
 calibrated_synthetic <- synpmx_calibrated(
   raw, roles, MODEL, DESIGN, PRIORS,
   epsilon       = EPSILON,
