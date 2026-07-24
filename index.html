@@ -100,10 +100,7 @@
 <span><span class="co">#&gt; 3 13 0.30 10.00272146   0.00    0   2 85.25496</span></span>
 <span><span class="co">#&gt; 4 13 0.63 11.89216329   0.00    0   2 85.25496</span></span></code></pre></div>
 <p>The output keeps the source schema, the event grammar, and the cohort size. What you cannot say about it is that it is anonymous — it is assembled from real trajectories, so it inherits the source data’s handling obligations wherever it is used. That is a rule about who may see it, not about which machine holds it: using it on an analyst workstation covered by the same access controls is a supported case, and much of the point of the package.</p>
-</div>
-<div class="section level2">
-<h2 id="the-four-modes">The four modes<a class="anchor" aria-label="anchor" href="#the-four-modes"></a>
-</h2>
+<p>The other three modes for generating synthetic data, cover the scenarios where formal data privacy requirements are needed. They are included in the package as part of a conceptual framework to help the modeler think about various options that are available, but these methods have not been yet been audited for their ability to protect data privacy.</p>
 <table class="table">
 <colgroup>
 <col width="20%">
@@ -156,18 +153,17 @@
 <p>Two rules of thumb decide between them:</p>
 <ul>
 <li>
-<strong>The trust boundary decides whether you need differential privacy.</strong> Ask whether the generated data can reach anyone the source data could not — a question about people and obligations, not about machines. Moving output to a workstation under the same access controls reaches no one new; sending it to a vendor does. If no one new, AVATAR is more useful and its lack of a formal guarantee costs nothing, because there is no adversary to guarantee against. If someone new, only an accounted release holds up.</li>
-<li>
-<strong>The cohort size decides which private mode is usable.</strong> Epsilon buys accuracy in proportion to the number of subjects and in inverse proportion to how many quantities you release. At 12 subjects, releasing two numbers can work and releasing fifty cannot.</li>
+<strong>The trust boundary decides whether you need differential privacy.</strong> Ask whether the generated data can reach anyone the source data could not. Moving output to a workstation under the same access controls reaches no one new; sending it to a vendor does. If no one new can access the data, AVATAR is more useful and its lack of a formal guarantee costs nothing, because there is no adversary to guarantee against.</li>
+<li><strong>The cohort size decides which private mode is usable if needed.</strong></li>
 </ul>
-<p><code><a href="articles/synpmx-method.html">vignette("synpmx-method")</a></code> runs all four on the same dataset and shows the results side by side.</p>
+<p><code><a href="articles/synpmx-method.html">vignette("synpmx-method")</a></code> runs all four methods on the same dataset and shows the results side by side.</p>
 </div>
 <div class="section level2">
 <h2 id="maintenance-status">Maintenance status<a class="anchor" aria-label="anchor" href="#maintenance-status"></a>
 </h2>
 <p><strong>AVATAR blending is the primary, maintained path.</strong> It has no dependencies beyond base R, and is what to reach for when the output stays within the source data’s own access controls and obligations.</p>
 <p>The three differentially private modes (<strong>prior</strong>, <strong>calibration</strong>, <strong>empirical</strong>) are a complete, tested, but <strong>secondary</strong> path, kept because formal privacy is the right answer when data crosses a trust boundary. They are provided as-is: not under active development, carrying known open findings, and <strong>not independently privacy-audited</strong>. Treat them as a principled demonstration of the privacy/utility tradeoff, not as a production release mechanism. A real regulated release needs the specialist review described in the <a href="https://iamstein.github.io/synpmx/articles/privacy-argument.html">mechanism-level privacy argument</a>, and depends on the external <a href="https://docs.opendp.org/en/stable/api/r/" class="external-link">OpenDP</a> package, which synpmx does not control.</p>
-<p>That status is enforced, not just documented: <code><a href="reference/synpmx_calibrated.html">synpmx_calibrated()</a></code> and <code><a href="reference/synpmx_empirical.html">synpmx_empirical()</a></code> refuse to run until <code><a href="reference/synpmx_enable_dp_engines.html">synpmx_enable_dp_engines()</a></code> has been called once in the session, an acknowledgment that does not persist across sessions, script runs, or CI jobs. <code>backend = "public"</code> calls make no DP claim already and are exempt.</p>
+<p>That status is enforced, not just documented: <code><a href="reference/synpmx_calibrated.html">synpmx_calibrated()</a></code> and <code><a href="reference/synpmx_empirical.html">synpmx_empirical()</a></code> refuse to run until <code><a href="reference/synpmx_enable_dp_engines.html">synpmx_enable_dp_engines()</a></code> has been called once in the session, an acknowledgment that does not persist across sessions, script runs, or CI jobs.</p>
 </div>
 <div class="section level2">
 <h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
