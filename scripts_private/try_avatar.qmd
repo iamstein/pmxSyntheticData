@@ -174,4 +174,6 @@ ggplot(compare, aes(time, dv, group = id)) +
 ```
 
 The synthetic table carries no formal privacy guarantee; it is built by blending
-real subject trajectories and is for trusted-environment use only.
+real subject trajectories, so it stays under the source data's own access
+controls and obligations wherever it is used — your own workstation included, a
+partner or vendor not.

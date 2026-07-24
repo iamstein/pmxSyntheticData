@@ -106,7 +106,8 @@ PRIORS <- pmx_priors(
 # resample for categorical -- the same approach as Novartis's synadam. The
 # default 1st/99th-percentile clip keeps the two extreme patients from leaking;
 # pass clip = NULL to expose the raw min/max like synadam does. This is NOT
-# differentially private and is for trusted-environment use only.
+# differentially private, so keep such output under the source data's own access
+# controls; the DP label on the release does not make these columns releasable.
 COVARIATES <- pmx_covariates_auto(
   c("WT", "AGE", "SEX", "RACE", "EGFR")     # every covariate column you want
   # , clip = NULL                            # uncomment to match synadam exactly

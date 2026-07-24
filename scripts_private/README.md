@@ -72,8 +72,8 @@ rule):
   a plain `.R`? `knitr::purl("try_avatar.qmd")` writes one out — there is a
   single template and the script is generated from it.
 - **`try_dp_calibrated.R`** — the differentially private structural path, for
-  data that may CROSS A TRUST BOUNDARY and needs a formal (epsilon, delta)
-  guarantee. Needs a structural model, priors, and a trial design. This is the
+  output that may REACH SOMEONE THE SOURCE DATA COULD NOT (a partner, a vendor,
+  a publication) and needs a formal (epsilon, delta) guarantee. Needs a structural model, priors, and a trial design. This is the
   secondary, provided-as-is path (see the package README's maintenance status).
 
 `try_avatar_pit565.qmd` is a filled-in AVATAR example on a real study, kept as a
